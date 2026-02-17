@@ -268,63 +268,68 @@
         );
     }
 
- // Получаем элементы формы
-const form = document.getElementById('bookingForm');
-const nameInput = document.getElementById('name');
-const brandInput = document.getElementById('brand');
-const modelInput = document.getElementById('model');
-const plateInput = document.getElementById('plate');
-const serviceInput = document.getElementById('service');
-const urgencyInput = document.getElementById('urgency');
-const phoneInput = document.getElementById('phone');
-const comment = document.getElementById('comment');
-const charCount = document.getElementById('charCount');
-const btn = form.querySelector('button');
+    // Получаем service_id из URL параметров
+    const urlParams = new URLSearchParams(window.location.search);
+    const serviceId = urlParams.get('service_id');
 
-// Счётчик символов
-comment.addEventListener('input', () => {
-    charCount.textContent = comment.value.length;
-});
+    // Получаем элементы формы
+    const form = document.getElementById('bookingForm');
+    const nameInput = document.getElementById('name');
+    const brandInput = document.getElementById('brand');
+    const modelInput = document.getElementById('model');
+    const plateInput = document.getElementById('plate');
+    const serviceInput = document.getElementById('service');
+    const urgencyInput = document.getElementById('urgency');
+    const phoneInput = document.getElementById('phone');
+    const comment = document.getElementById('comment');
+    const charCount = document.getElementById('charCount');
+    const btn = form.querySelector('button');
 
-// Отправка формы
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
+    // Счётчик символов
+    comment.addEventListener('input', () => {
+        charCount.textContent = comment.value.length;
+    });
 
-    if (!form.checkValidity()) {
-        tg.showAlert('Заполните все обязательные поля');
-        return;
-    }
+    // Отправка формы
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-    const data = {
-        client_name: nameInput.value,      // ← Было: name.value
-        brand: brandInput.value,    // ← Было: brand.value
-        model: modelInput.value,    // ← Было: model.value
-        plate: plateInput.value,    // ← Было: plate.value
-        service: serviceInput.value, // ← Было: service.value
-        urgency: urgencyInput.value, // ← Было: urgency.value
-        phone: phoneInput.value,    // ← Было: phone.value
-        comment: comment.value,
-        user: tg.initDataUnsafe.user
-    };
+        if (!form.checkValidity()) {
+            tg.showAlert('Заполните все обязательные поля');
+            return;
+        }
 
-    btn.disabled = true;
-    btn.textContent = 'Отправка...';
+        const data = {
+            service_id: serviceId,  // ← ДОБАВЛЯЕМ service_id
+            client_name: nameInput.value,
+            brand: brandInput.value,
+            model: modelInput.value,
+            plate: plateInput.value,
+            service: serviceInput.value,
+            urgency: urgencyInput.value,
+            phone: phoneInput.value,
+            comment: comment.value,
+            user: tg.initDataUnsafe.user
+        };
 
-    tg.sendData(JSON.stringify(data));
+        btn.disabled = true;
+        btn.textContent = 'Отправка...';
 
-    setTimeout(() => {
-        form.remove();
-        document.querySelector('.container').insertAdjacentHTML(
-            'beforeend',
-            `
-            <div class="success-message">
-                <h2>✅ Заявка отправлена</h2>
-                <p>Мы свяжемся с вами в ближайшее время</p>
-            </div>
-            `
-        );
-    }, 400);
-});
+        tg.sendData(JSON.stringify(data));
+
+        setTimeout(() => {
+            form.remove();
+            document.querySelector('.container').insertAdjacentHTML(
+                'beforeend',
+                `
+                <div class="success-message">
+                    <h2>✅ Заявка отправлена</h2>
+                    <p>Мы свяжемся с вами в ближайшее время</p>
+                </div>
+                `
+            );
+        }, 400);
+    });
 </script>
 </body>
 </html>
