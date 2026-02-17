@@ -271,6 +271,7 @@
     // Получаем service_id из URL параметров
     const urlParams = new URLSearchParams(window.location.search);
     const serviceId = urlParams.get('service_id');
+    console.log('Service ID из URL:', serviceId);  // ← ДОБАВЬ ЭТО
 
     // Получаем элементы формы
     const form = document.getElementById('bookingForm');
@@ -290,32 +291,36 @@
         charCount.textContent = comment.value.length;
     });
 
+    
+
     // Отправка формы
     form.addEventListener('submit', (e) => {
-        e.preventDefault();
+    e.preventDefault();
 
-        if (!form.checkValidity()) {
-            tg.showAlert('Заполните все обязательные поля');
-            return;
-        }
+    if (!form.checkValidity()) {
+        tg.showAlert('Заполните все обязательные поля');
+        return;
+    }
 
-        const data = {
-            service_id: serviceId,  // ← ДОБАВЛЯЕМ service_id
-            client_name: nameInput.value,
-            brand: brandInput.value,
-            model: modelInput.value,
-            plate: plateInput.value,
-            service: serviceInput.value,
-            urgency: urgencyInput.value,
-            phone: phoneInput.value,
-            comment: comment.value,
-            user: tg.initDataUnsafe.user
-        };
+    const data = {
+        service_id: serviceId,  // ← УБЕДИСЬ ЧТО ОНО ЗДЕСЬ
+        client_name: nameInput.value,
+        brand: brandInput.value,
+        model: modelInput.value,
+        plate: plateInput.value,
+        service: serviceInput.value,
+        urgency: urgencyInput.value,
+        phone: phoneInput.value,
+        comment: comment.value,
+        user: tg.initDataUnsafe.user
+    };
 
-        btn.disabled = true;
-        btn.textContent = 'Отправка...';
+    console.log('Отправляю данные:', data);  // ← ДОБАВЬ ЭТО
 
-        tg.sendData(JSON.stringify(data));
+    btn.disabled = true;
+    btn.textContent = 'Отправка...';
+
+    tg.sendData(JSON.stringify(data));
 
         setTimeout(() => {
             form.remove();
