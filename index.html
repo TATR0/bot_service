@@ -233,7 +233,7 @@
 </head>
 
 <body>
-<!-- DEBUG ПА��ЕЛЬ -->
+<!-- DEBUG ПАНЕЛЬ -->
 <div id="debugPanel"></div>
 
 <div class="container">
@@ -311,7 +311,6 @@
      JS ЛОГИКА
 ====================== -->
 <script>
-    // ===== DEBUG ПАНЕЛЬ =====
     const debugPanel = document.getElementById('debugPanel');
     const logs = [];
     const MAX_LOGS = 25;
@@ -327,10 +326,7 @@
             .map(log => `<div class="debug-log ${log.type}">${log.message}</div>`)
             .join('');
 
-        // Автоскролл вниз
         debugPanel.scrollTop = debugPanel.scrollHeight;
-
-        // Также в консоль браузера
         console.log(`[${type.toUpperCase()}]`, message);
     }
 
@@ -338,7 +334,6 @@
         addLog(`❌ JS ошибка: ${e.message}`, 'error');
     });
 
-    // ===== ИНИЦИАЛИЗАЦИЯ =====
     addLog('📱 Инициализация Telegram WebApp...', 'info');
 
     const tg = window.Telegram.WebApp;
@@ -358,14 +353,12 @@
         tg.expand();
         addLog('✅ tg.expand() вызван', 'success');
 
-        // Информация о пользователе
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             addLog(`👤 Пользователь: ${tg.initDataUnsafe.user.first_name} (ID: ${tg.initDataUnsafe.user.id})`, 'info');
         } else {
             addLog('⚠️ initDataUnsafe.user недоступен', 'warning');
         }
 
-        // Тема
         if (tg.themeParams.bg_color) {
             document.documentElement.style.setProperty('--bg-main', tg.themeParams.bg_color);
             addLog('🎨 Тема применена', 'success');
@@ -374,19 +367,18 @@
         addLog('⚠️ Открыто вне Telegram или в браузере', 'warning');
     }
 
-    // ===== ПОЛУЧЕНИЕ service_id =====
     addLog('🔍 Получение параметров URL...', 'info');
     const urlParams = new URLSearchParams(window.location.search);
     const serviceId = urlParams.get('service_id');
     
+    addLog(`📍 Полный URL: ${window.location.href}`, 'info');
+    
     if (serviceId) {
         addLog(`✅ Service ID найден: ${serviceId}`, 'success');
     } else {
-        addLog('⚠️ Service ID не найден в URL', 'warning');
-        addLog(`📍 URL: ${window.location.href}`, 'info');
+        addLog('⚠️ Service ID НЕ найден в URL!', 'warning');
     }
 
-    // ===== ПОЛУЧЕНИЕ ЭЛЕМЕНТОВ ФОРМЫ =====
     addLog('📝 Получение элементов формы...', 'info');
     const form = document.getElementById('bookingForm');
     const nameInput = document.getElementById('name');
@@ -406,12 +398,10 @@
         addLog('❌ Некоторые элементы формы не найдены', 'error');
     }
 
-    // ===== СЧЁТЧИК СИМВОЛОВ =====
     comment.addEventListener('input', () => {
         charCount.textContent = comment.value.length;
     });
 
-    // ===== ОТПРАВКА ФОРМЫ =====
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         addLog('📤 Форма отправляется', 'info');
@@ -441,7 +431,13 @@
         addLog(`  Имя: ${data.client_name}`, 'info');
         addLog(`  Телефон: ${data.phone}`, 'info');
         addLog(`  Авто: ${data.brand} ${data.model}`, 'info');
-        addLog(`  Service ID: ${data.service_id}`, 'info');
+        addLog(`  Service ID: "${data.service_id}"`, 'info');
+
+        if (!data.service_id) {
+            addLog('❌ ОШИБКА: Service ID пустой! Данные не будут отправлены!', 'error');
+            tg.showAlert('Ошибка: Service ID не найден. Попробуйте снова.');
+            return;
+        }
 
         btn.disabled = true;
         btn.textContent = 'Отправка...';
@@ -451,10 +447,15 @@
             const jsonData = JSON.stringify(data);
             addLog(`📨 Отправляю JSON (${jsonData.length} байт)`, 'info');
             
-            tg.sendData(jsonData);
-            addLog('✅ tg.sendData() выполнен', 'success');
+            if (tg && tg.sendData) {
+                addLog('🔵 Используется tg.sendData()', 'info');
+                tg.sendData(jsonData);
+                addLog('✅ tg.sendData() выполнен', 'success');
+            } else {
+                addLog('❌ tg.sendData недоступен!', 'error');
+            }
         } catch (error) {
-            addLog(`❌ Ошибка при отправке: ${error.message}`, 'error');
+            addLog(`❌ Ошиб��а при отправке: ${error.message}`, 'error');
         }
 
         setTimeout(() => {
