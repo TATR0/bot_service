@@ -7,6 +7,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 URL_SITE = os.getenv("BASE_WEBAPP_URL")
 MASTER_CHAT_ID = int(os.getenv("MASTER_CHAT_ID", "0"))
+BOT_USERNAME = os.getenv("BOT_USERNAME", "CitatAlcw_bot")  # ← НОВОЕ
 
 # Database
 PG_USER = os.getenv("PG_USER", "postgres")

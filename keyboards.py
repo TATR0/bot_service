@@ -27,7 +27,7 @@ def register_service_keyboard():
     )
 
 # ===== АДМИН КНОПКИ =====
-def admin_keyboard(request_id: int):
+def admin_keyboard(request_id: str):  # ← ИЗМЕНЕНО НА str
     """Кнопки для обновления статуса заявки"""
     return InlineKeyboardMarkup(inline_keyboard=[
         [

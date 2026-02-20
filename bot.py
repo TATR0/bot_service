@@ -4,10 +4,13 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from config import BOT_TOKEN
 from database import db
-from handlers import main, register_service
+from handlers import register_service, service_link, client_request, main
 
 # Логирование
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.DEBUG,  # ← ИЗМЕНЕНО НА DEBUG
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 bot = Bot(token=BOT_TOKEN)
@@ -25,11 +28,15 @@ async def on_shutdown():
     logger.info("❌ Бот остановлен и БД отключена")
 
 def register_handlers():
-    """Регистрация всех обработчиков"""
+    """Регистрация всех обработчиков - ВАЖНЫЙ ПОРЯДОК!"""
+    # ⚠️ web_app_data ДОЛЖЕН БЫТЬ ПЕРВЫМ
     dp.include_routers(
-        register_service.router,
-        main.router
+        client_request.router,      # ← ПЕРВЫЙ (web_app_data)
+        service_link.router,        # ← ВТОРОЙ (/start SVC_)
+        register_service.router,    # ← ТРЕТИЙ (регистрация)
+        main.router                 # ← ПОСЛЕДНИЙ (остальное)
     )
+    logger.info("✅ Обработчики зарегистрированы")
 
 async def main_async():
     """Основной цикл"""

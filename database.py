@@ -1,5 +1,5 @@
 import asyncpg
-from config import PG_USER, PG_PASSWORD, PG_HOST, PG_PORT, PG_DB
+from config import PG_USER, PG_PASSWORD, PG_HOST, PG_PORT, PG_DB, BOT_USERNAME
 from uuid import uuid4
 from datetime import datetime
 
@@ -27,14 +27,14 @@ class Database:
             print("❌ БД отключена")
 
     # ===== СЕРВИСЫ =====
-    async def add_service(self, service_name: str, phone: str, owner_id: int) -> str:
+    async def add_service(self, service_name: str, phone: str, owner_id: int, location: str = "") -> str:
         """Добавить новый сервис"""
         idservice = str(uuid4())
         async with self.pool.acquire() as conn:
             await conn.execute(
-                """INSERT INTO services (idservice, service_name, service_number, owner_id)
-                   VALUES ($1, $2, $3, $4)""",
-                idservice, service_name, phone, owner_id
+                """INSERT INTO services (idservice, service_name, service_number, owner_id, location_service)
+                   VALUES ($1, $2, $3, $4, $5)""",
+                idservice, service_name, phone, owner_id, location
             )
         return idservice
 
@@ -45,6 +45,31 @@ class Database:
                 "SELECT idservice FROM services WHERE owner_id = $1",
                 owner_id
             )
+
+    def generate_service_link(self, idservice: str) -> str:
+        """Сгенерировать уникальную ссылку на сервис"""
+        return f"https://t.me/{BOT_USERNAME}?start=SVC_{idservice}"
+
+    def format_registration_message(self, service_name: str, phone: str, 
+                                   admin_name: str, idservice: str, location: str = "") -> str:
+        """Форматировать сообщение об успешной регистрации сервиса"""
+        link = self.generate_service_link(idservice)
+        message = (
+            f"✅ <b>Сервис успешно зарегистрирован!</b>\n\n"
+            f"<b>Название:</b> {service_name}\n"
+            f"<b>Телефон:</b> {phone}\n"
+        )
+        
+        if location:
+            message += f"<b>Адрес:</b> {location}\n"
+        
+        message += (
+            f"<b>Администратор:</b> {admin_name}\n\n"
+            f"<b>ID сервиса:</b> <code>{idservice}</code>\n"
+            f"<b>Ваша ссылка на размещение</b>\n"
+            f"<code>{link}</code>"
+        )
+        return message
 
     # ===== АДМИНИСТРАТОРЫ =====
     async def add_admin(self, idservice: str, idusertg: int):
@@ -62,11 +87,21 @@ class Database:
         """Получить все сервисы админа"""
         async with self.pool.acquire() as conn:
             return await conn.fetch(
-                """SELECT s.idservice, s.service_name, s.service_number
+                """SELECT s.idservice, s.service_name, s.service_number, s.location_service
                    FROM services s
                    JOIN admins a ON s.idservice = a.idservice
                    WHERE a.idusertg = $1""",
                 admin_id
+            )
+
+    async def get_admins_by_service(self, service_id: str) -> list:
+        """Получить всех админов сервиса по service_id"""
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(
+                """SELECT a.idadmins, a.idservice, a.idusertg
+                   FROM admins a
+                   WHERE a.idservice = $1""",
+                service_id
             )
 
     # ===== ЗАЯВКИ =====
@@ -79,8 +114,8 @@ class Database:
             await conn.execute(
                 """INSERT INTO requests (idrequests, idservice, client_name, phone, brand, model, 
                 plate, service_type, urgency, comment, idclienttg, status)
-                VALUES ($1, null, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'new')""",# вернуть idservice
-                idrequest, client_name, phone, brand, model, plate,
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'new')""",
+                idrequest, idservice, client_name, phone, brand, model, plate,
                 service_type, urgency, comment, client_tg_id
             )
         return idrequest

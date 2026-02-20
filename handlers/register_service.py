@@ -12,6 +12,7 @@ router = Router()
 class RegisterService(StatesGroup):
     waiting_name = State()
     waiting_phone = State()
+    waiting_location = State()
     waiting_admin_id = State()
 
 @router.message(Command("register_service"))
@@ -53,6 +54,23 @@ async def process_service_phone(message: Message, state: FSMContext):
     
     await state.update_data(phone=phone)
     await message.answer(
+        "📍 Введите адрес автосервиса:\n\n"
+        "<i>Пример: г. Москва, ул. Пушкина, д. 10</i>",
+        parse_mode="HTML"
+    )
+    await state.set_state(RegisterService.waiting_location)
+
+@router.message(RegisterService.waiting_location)
+async def process_service_location(message: Message, state: FSMContext):
+    """Получение адреса сервиса"""
+    location = message.text.strip()
+    
+    if len(location) < 5:
+        await message.answer("❌ Адрес должен быть не менее 5 символов")
+        return
+    
+    await state.update_data(location=location)
+    await message.answer(
         "👤 <b>Введите администратора сервиса:</b>\n\n"
         "Способы ввода:\n"
         "• <code>@username</code> (если есть username)\n"
@@ -68,6 +86,7 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
     """Получение ID администратора"""
     user_input = message.text.strip()
     admin_id = None
+    admin_display_name = None
 
     # Проверка на @username
     username_match = re.match(r"^@(\w+)$", user_input)
@@ -76,7 +95,7 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
         try:
             user = await bot.get_chat(username)
             admin_id = user.id
-            admin_name = f"@{username}"
+            admin_display_name = f"ID: {admin_id}"
         except Exception as e:
             await message.answer(
                 f"❌ Не удалось найти пользователя <code>@{username}</code>\n\n"
@@ -89,7 +108,7 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
         admin_id = int(user_input)
         try:
             user = await bot.get_chat(admin_id)
-            admin_name = f"ID: {admin_id}"
+            admin_display_name = f"ID: {admin_id}"
         except Exception:
             await message.answer(
                 f"❌ Пользователь с ID <code>{admin_id}</code> не найден\n\n"
@@ -113,16 +132,22 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
         idservice = await db.add_service(
             data['service_name'],
             data['phone'],
-            message.from_user.id  # owner_id — тот кто регистрирует
+            message.from_user.id,  # owner_id — тот кто регистрирует
+            data['location']  # ← ДОБАВЛЯЕМ АДРЕС
         )
         await db.add_admin(idservice, admin_id)
 
+        # Используем новый метод для форматирования сообщения
+        success_message = db.format_registration_message(
+            data['service_name'],
+            data['phone'],
+            admin_display_name,
+            idservice,
+            data['location']  # ← ПЕРЕДАЕМ АДРЕС
+        )
+
         await message.answer(
-            f"✅ <b>Сервис успешно зарегистрирован!</b>\n\n"
-            f"<b>Название:</b> {data['service_name']}\n"
-            f"<b>Телефон:</b> {data['phone']}\n"
-            f"<b>Администратор:</b> {admin_name}\n\n"
-            f"ID сервиса: <code>{idservice}</code>",
+            success_message,
             parse_mode="HTML",
             reply_markup=start_keyboard()
         )
@@ -133,7 +158,8 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
                 admin_id,
                 f"👋 Вас добавили администратором автосервиса!\n\n"
                 f"<b>Название:</b> {data['service_name']}\n"
-                f"<b>Телефон:</b> {data['phone']}\n\n"
+                f"<b>Телефон:</b> {data['phone']}\n"
+                f"<b>Адрес:</b> {data['location']}\n\n"
                 f"Теперь вы можете управлять заявками. Нажмите /start",
                 parse_mode="HTML"
             )
