@@ -373,7 +373,8 @@
     let selectedServiceId = null;
 
     // API URL - замени на свой домен/IP
-    const API_BASE_URL = 'https://tatr0.github.io/bot_service/';  // ← ЗАМЕНИ НА СВОЙ URL
+        const API_BASE_URL = 'http://localhost:8000';  // При локальном тесте
+    // const API_BASE_URL = 'https://your-domain.com';  // При продакшене
 
     async function searchServices(city) {
         addLog(`🔍 Ищу сервисы в городе: ${city}`, 'info');
@@ -381,21 +382,29 @@
         searchBtn.textContent = 'Поиск...';
         
         try {
-            const response = await fetch(`${API_BASE_URL}/api/services/search/${encodeURIComponent(city)}`);
+            const url = `${API_BASE_URL}/api/services/search/${encodeURIComponent(city)}`;
+            addLog(`📡 Запрос к: ${url}`, 'info');
+            
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const result = await response.json();
             
-            addLog(`📊 Ответ от сервера: ${JSON.stringify(result)}`, 'info');
+            addLog(`📊 Ответ: success=${result.success}, services=${result.services?.length || 0}`, 'info');
             
-            if (result.success && result.services.length > 0) {
+            if (result.success && result.services && result.services.length > 0) {
                 addLog(`✅ Найдено ${result.services.length} сервисов в ${city}`, 'success');
                 displayServices(result.services);
             } else {
-                addLog(`❌ Сервисы в городе ${city} не найдены`, 'warning');
+                addLog(`⚠️ В городе '${city}' сервисов не найдено`, 'warning');
                 servicesList.innerHTML = `<p style="color: #ffaa00; padding: 10px;">Сервисов в городе <b>${city}</b> не найдено 😔</p>`;
             }
         } catch (error) {
             addLog(`❌ Ошибка при поиске: ${error.message}`, 'error');
-            servicesList.innerHTML = `<p style="color: #ff3333; padding: 10px;">❌ Ошибка подключения к серверу</p>`;
+            servicesList.innerHTML = `<p style="color: #ff3333; padding: 10px;">❌ Ошибка подключения: ${error.message}</p>`;
         } finally {
             searchBtn.disabled = false;
             searchBtn.textContent = 'Поиск';
