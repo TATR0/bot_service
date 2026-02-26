@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Автосервис — запись</title>
-
-    <!-- Telegram WebApp SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
@@ -20,11 +18,7 @@
             --gap: 18px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -34,10 +28,7 @@
             color: var(--text-main);
         }
 
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-        }
+        .container { max-width: 480px; margin: 0 auto; }
 
         .header {
             text-align: center;
@@ -58,7 +49,8 @@
             margin-top: 6px;
         }
 
-        form {
+        /* ───── общий блок-карточка ───── */
+        .card {
             background: var(--bg-card);
             backdrop-filter: blur(18px);
             border-radius: var(--radius);
@@ -66,12 +58,12 @@
             display: flex;
             flex-direction: column;
             gap: var(--gap);
-            animation: fadeUp 0.5s ease;
+            animation: fadeUp 0.4s ease;
         }
 
         @keyframes fadeUp {
             from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .form-group {
@@ -87,9 +79,7 @@
             text-transform: uppercase;
         }
 
-        input,
-        select,
-        textarea {
+        input, select, textarea {
             padding: 14px;
             border-radius: 12px;
             border: 2px solid transparent;
@@ -97,26 +87,21 @@
             color: #fff;
             font-size: 15px;
             transition: all 0.25s ease;
+            width: 100%;
         }
 
-        input::placeholder,
-        textarea::placeholder {
-            color: #888;
-        }
+        select option { background: #1a1f3c; color: #fff; }
 
-        input:focus,
-        select:focus,
-        textarea:focus {
+        input::placeholder, textarea::placeholder { color: #888; }
+
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--accent);
             background: var(--accent-soft);
             box-shadow: 0 0 0 4px rgba(0,212,255,0.15);
         }
 
-        textarea {
-            min-height: 90px;
-            resize: none;
-        }
+        textarea { min-height: 90px; resize: none; }
 
         .char-count {
             text-align: right;
@@ -124,33 +109,86 @@
             color: var(--text-muted);
         }
 
-        button {
-            margin-top: 8px;
+        /* ───── кнопки ───── */
+        .btn {
             padding: 16px;
             border-radius: 14px;
             border: none;
             background: linear-gradient(135deg, var(--accent), #5ee7ff);
             color: #000;
             font-weight: 800;
+            font-size: 15px;
             letter-spacing: 0.6px;
             cursor: pointer;
             transition: all 0.25s ease;
+            width: 100%;
         }
 
-        button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 30px rgba(0,212,255,0.4);
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0,212,255,0.4); }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            margin-top: 4px;
         }
 
-        button:active {
-            transform: scale(0.98);
+        /* ───── список сервисов ───── */
+        .service-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        .service-card {
+            background: rgba(255,255,255,0.07);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
+        .service-card:hover, .service-card.selected {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .service-card .svc-name {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-main);
+        }
+
+        .service-card .svc-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* ───── лоадер ───── */
+        .loader {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px 0;
+            font-size: 14px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 22px; height: 22px;
+            border: 3px solid rgba(0,212,255,0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-bottom: 8px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ───── сообщение об успехе ───── */
         .success-message {
             margin-top: 20px;
             padding: 24px;
@@ -160,10 +198,32 @@
             animation: fadeUp 0.5s ease;
         }
 
-        .success-message h2 {
-            color: var(--accent);
-            margin-bottom: 8px;
+        .success-message h2 { color: var(--accent); margin-bottom: 8px; }
+
+        /* ───── экраны ───── */
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .step-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
         }
+
+        .step-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 24px 0;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .empty-state .emoji { font-size: 36px; margin-bottom: 8px; }
     </style>
 </head>
 
@@ -175,144 +235,337 @@
         <p>Онлайн-запись на обслуживание</p>
     </div>
 
-    <form id="bookingForm">
+    <!-- ══════════════════════════════════════
+         ЭКРАН 1: Выбор города (только без service_id)
+    ══════════════════════════════════════ -->
+    <div id="screenCity" class="screen">
+        <div class="card">
+            <div>
+                <div class="step-title">📍 Выберите ваш город</div>
+                <div class="step-sub">Мы найдём автосервисы рядом с вами</div>
+            </div>
 
-        <div class="form-group">
-            <label>Ваше имя</label>
-            <input id="name" required placeholder="Иван">
+            <div class="form-group">
+                <label>Город</label>
+                <input id="cityInput" placeholder="Начните вводить город..." autocomplete="off">
+            </div>
+
+            <div id="cityLoader" class="loader" style="display:none">
+                <div class="spinner"></div><br>Загружаем города...
+            </div>
+
+            <button class="btn" id="btnFindServices" disabled>Найти автосервисы →</button>
         </div>
+    </div>
 
-        <div class="form-group">
+    <!-- ══════════════════════════════════════
+         ЭКРАН 2: Список сервисов в городе
+    ══════════════════════════════════════ -->
+    <div id="screenServices" class="screen">
+        <div class="card">
+            <div>
+                <div class="step-title">🏪 Автосервисы в городе <span id="cityLabel"></span></div>
+                <div class="step-sub">Выберите нужный сервис</div>
+            </div>
+
+            <div id="serviceLoader" class="loader" style="display:none">
+                <div class="spinner"></div><br>Загружаем сервисы...
+            </div>
+
+            <div id="serviceList" class="service-list"></div>
+
+            <button class="btn" id="btnSelectService" disabled>Записаться в выбранный сервис →</button>
+            <button class="btn btn-outline" id="btnBackToCity">← Изменить город</button>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         ЭКРАН 3: Форма записи
+    ══════════════════════════════════════ -->
+    <div id="screenForm" class="screen">
+        <form id="bookingForm" class="card">
+
+            <div class="form-group">
+                <label>Ваше имя</label>
+                <input id="name" required placeholder="Иван">
+            </div>
+
             <div class="form-group">
                 <label>Марка</label>
                 <input id="brand" required placeholder="Toyota">
             </div>
+
             <div class="form-group">
                 <label>Модель</label>
                 <input id="model" required placeholder="Camry">
             </div>
-        </div>
 
-        <div class="form-group">
-            <label>Госномер</label>
-            <input id="plate" required placeholder="А777АА77">
-        </div>
+            <div class="form-group">
+                <label>Госномер</label>
+                <input id="plate" required placeholder="А777АА77">
+            </div>
 
-        <div class="form-group">
-            <label>Тип работы</label>
-            <select id="service" required>
-                <option value="diagnostic">Диагностика</option>
-                <option value="oil-change">Замена масла</option>
-                <option value="suspension">Подвеска</option>
-                <option value="engine">Двигатель</option>
-                <option value="body">Кузов</option>
-                <option value="other">Другое</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label>Тип работы</label>
+                <select id="service" required>
+                    <option value="diagnostic">Диагностика</option>
+                    <option value="oil-change">Замена масла</option>
+                    <option value="suspension">Подвеска</option>
+                    <option value="engine">Двигатель</option>
+                    <option value="body">Кузов</option>
+                    <option value="other">Другое</option>
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label>Срочность</label>
-            <select id="urgency" required>
-                <option value="low">Не срочно</option>
-                <option value="medium">3–5 дней</option>
-                <option value="high">1–2 дня</option>
-                <option value="urgent">Сегодня</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label>Срочность</label>
+                <select id="urgency" required>
+                    <option value="low">Не срочно</option>
+                    <option value="medium">3–5 дней</option>
+                    <option value="high">1–2 дня</option>
+                    <option value="urgent">Сегодня</option>
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label>Телефон</label>
-            <input id="phone" required placeholder="+7 999 123-45-67">
-        </div>
+            <div class="form-group">
+                <label>Телефон</label>
+                <input id="phone" required placeholder="+7 999 123-45-67">
+            </div>
 
-        <div class="form-group">
-            <label>Комментарий</label>
-            <textarea id="comment" maxlength="500"
-                      placeholder="Опишите проблему..."></textarea>
-            <div class="char-count"><span id="charCount">0</span>/500</div>
-        </div>
+            <div class="form-group">
+                <label>Комментарий</label>
+                <textarea id="comment" maxlength="500" placeholder="Опишите проблему..."></textarea>
+                <div class="char-count"><span id="charCount">0</span>/500</div>
+            </div>
 
-        <button type="submit">Отправить заявку</button>
-    </form>
-</div>
+            <button type="submit" class="btn">Отправить заявку</button>
+
+            <!-- Кнопка «назад» только когда пришли через выбор сервиса -->
+            <button type="button" class="btn btn-outline" id="btnBackToServices" style="display:none">
+                ← Выбрать другой сервис
+            </button>
+        </form>
+    </div>
+
+</div><!-- /container -->
 
 <script>
-    const tg = window.Telegram.WebApp;
+// ══════════════════════════════════════════
+//  Инициализация Telegram WebApp
+// ══════════════════════════════════════════
+const tg = window.Telegram.WebApp;
+if (tg) {
+    tg.ready();
+    tg.expand();
+    if (tg.themeParams && tg.themeParams.bg_color) {
+        document.documentElement.style.setProperty('--bg-main', tg.themeParams.bg_color);
+    }
+}
 
-    if (tg) {
-        tg.ready();
-        tg.expand();
+// ══════════════════════════════════════════
+//  Параметры URL
+// ══════════════════════════════════════════
+const urlParams  = new URLSearchParams(window.location.search);
+const serviceId  = urlParams.get('service_id');   // задан — прямой переход к форме
+const apiBase    = urlParams.get('api') || '';     // базовый URL API (можно передать отдельно)
 
-        if (tg.themeParams.bg_color) {
-            document.documentElement.style.setProperty('--bg-main', tg.themeParams.bg_color);
+// ══════════════════════════════════════════
+//  Состояние приложения
+// ══════════════════════════════════════════
+let selectedServiceId   = serviceId || null;
+let selectedServiceName = '';
+let allCities           = [];
+
+// ══════════════════════════════════════════
+//  Управление экранами
+// ══════════════════════════════════════════
+function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+// ══════════════════════════════════════════
+//  СТАРТ: определяем начальный экран
+// ══════════════════════════════════════════
+if (serviceId) {
+    // Прямая ссылка на сервис → сразу форма
+    selectedServiceId = serviceId;
+    showScreen('screenForm');
+} else {
+    // Без параметра → экран выбора города
+    showScreen('screenCity');
+    loadCities();
+}
+
+// ══════════════════════════════════════════
+//  Загрузка списка городов с API
+// ══════════════════════════════════════════
+async function loadCities() {
+    document.getElementById('cityLoader').style.display = 'block';
+    try {
+        // API-эндпоинт: GET /api/cities  → { cities: ["Москва", "СПб", ...] }
+        const res  = await fetch(`${apiBase}/api/cities`);
+        const data = await res.json();
+        allCities  = data.cities || [];
+    } catch (e) {
+        console.warn('Не удалось загрузить города:', e);
+        allCities = [];
+    }
+    document.getElementById('cityLoader').style.display = 'none';
+}
+
+// ── Фильтрация городов при вводе ──
+const cityInput     = document.getElementById('cityInput');
+const btnFind       = document.getElementById('btnFindServices');
+
+cityInput.addEventListener('input', () => {
+    const val = cityInput.value.trim();
+    btnFind.disabled = val.length < 2;
+});
+
+cityInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); btnFind.click(); }
+});
+
+btnFind.addEventListener('click', async () => {
+    const city = cityInput.value.trim();
+    if (!city) return;
+    await loadServicesForCity(city);
+});
+
+// ══════════════════════════════════════════
+//  Загрузка сервисов по городу
+// ══════════════════════════════════════════
+async function loadServicesForCity(city) {
+    document.getElementById('cityLabel').textContent = city;
+    showScreen('screenServices');
+
+    const listEl   = document.getElementById('serviceList');
+    const loaderEl = document.getElementById('serviceLoader');
+    const btnSel   = document.getElementById('btnSelectService');
+
+    listEl.innerHTML = '';
+    btnSel.disabled  = true;
+    loaderEl.style.display = 'block';
+
+    try {
+        // API-эндпоинт: GET /api/services?city=Москва
+        //   → { services: [{ id, name, phone, address }, ...] }
+        const res  = await fetch(`${apiBase}/api/services?city=${encodeURIComponent(city)}`);
+        const data = await res.json();
+        const services = data.services || [];
+
+        loaderEl.style.display = 'none';
+
+        if (services.length === 0) {
+            listEl.innerHTML = `
+                <div class="empty-state">
+                    <div class="emoji">🔍</div>
+                    В городе <b>${city}</b> пока нет зарегистрированных сервисов
+                </div>`;
+            return;
         }
+
+        services.forEach(svc => {
+            const card = document.createElement('div');
+            card.className = 'service-card';
+            card.dataset.id   = svc.id;
+            card.dataset.name = svc.name;
+            card.innerHTML = `
+                <div class="svc-name">${svc.name}</div>
+                <div class="svc-meta">📞 ${svc.phone || '—'}${svc.address ? ' · 📍 ' + svc.address : ''}</div>
+            `;
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.service-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedServiceId   = svc.id;
+                selectedServiceName = svc.name;
+                btnSel.disabled = false;
+            });
+            listEl.appendChild(card);
+        });
+
+    } catch (e) {
+        loaderEl.style.display = 'none';
+        listEl.innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div>Ошибка загрузки сервисов</div>`;
+        console.error(e);
+    }
+}
+
+// ── Кнопка «Записаться в выбранный сервис» ──
+document.getElementById('btnSelectService').addEventListener('click', () => {
+    if (!selectedServiceId) return;
+    document.getElementById('btnBackToServices').style.display = 'block';
+    showScreen('screenForm');
+});
+
+// ── Назад: сервисы → город ──
+document.getElementById('btnBackToCity').addEventListener('click', () => {
+    showScreen('screenCity');
+});
+
+// ── Назад: форма → сервисы ──
+document.getElementById('btnBackToServices').addEventListener('click', () => {
+    showScreen('screenServices');
+});
+
+// ══════════════════════════════════════════
+//  Форма записи
+// ══════════════════════════════════════════
+const comment   = document.getElementById('comment');
+const charCount = document.getElementById('charCount');
+const form      = document.getElementById('bookingForm');
+const submitBtn = form.querySelector('button[type="submit"]');
+
+comment.addEventListener('input', () => {
+    charCount.textContent = comment.value.length;
+});
+
+form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    if (!form.checkValidity()) {
+        tg.showAlert('Заполните все обязательные поля');
+        return;
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const serviceId = urlParams.get('service_id');
+    if (!selectedServiceId) {
+        tg.showAlert('Ошибка: не выбран автосервис. Попробуйте снова.');
+        return;
+    }
 
-    const form = document.getElementById('bookingForm');
-    const nameInput = document.getElementById('name');
-    const brandInput = document.getElementById('brand');
-    const modelInput = document.getElementById('model');
-    const plateInput = document.getElementById('plate');
-    const serviceInput = document.getElementById('service');
-    const urgencyInput = document.getElementById('urgency');
-    const phoneInput = document.getElementById('phone');
-    const comment = document.getElementById('comment');
-    const charCount = document.getElementById('charCount');
-    const btn = form.querySelector('button');
+    const data = {
+        service_id:  selectedServiceId,
+        client_name: document.getElementById('name').value,
+        brand:       document.getElementById('brand').value,
+        model:       document.getElementById('model').value,
+        plate:       document.getElementById('plate').value,
+        service:     document.getElementById('service').value,
+        urgency:     document.getElementById('urgency').value,
+        phone:       document.getElementById('phone').value,
+        comment:     comment.value,
+        user:        tg.initDataUnsafe?.user
+    };
 
-    comment.addEventListener('input', () => {
-        charCount.textContent = comment.value.length;
-    });
+    submitBtn.disabled    = true;
+    submitBtn.textContent = 'Отправка...';
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
+    try {
+        tg.sendData(JSON.stringify(data));
+    } catch (err) {
+        console.error('Ошибка при отправке:', err);
+    }
 
-        if (!form.checkValidity()) {
-            tg.showAlert('Заполните все обязательные поля');
-            return;
-        }
-
-        if (!serviceId) {
-            tg.showAlert('Ошибка: Service ID не найден. Попробуйте снова.');
-            return;
-        }
-
-        const data = {
-            service_id: serviceId,
-            client_name: nameInput.value,
-            brand: brandInput.value,
-            model: modelInput.value,
-            plate: plateInput.value,
-            service: serviceInput.value,
-            urgency: urgencyInput.value,
-            phone: phoneInput.value,
-            comment: comment.value,
-            user: tg.initDataUnsafe?.user
-        };
-
-        btn.disabled = true;
-        btn.textContent = 'Отправка...';
-
-        try {
-            tg.sendData(JSON.stringify(data));
-        } catch (error) {
-            console.error('Ошибка при отправке:', error);
-        }
-
-        setTimeout(() => {
-            form.remove();
-            document.querySelector('.container').insertAdjacentHTML(
-                'beforeend',
-                `<div class="success-message">
-                    <h2>✅ Заявка отправлена</h2>
-                    <p>Мы свяжемся с вами в ближайшее время</p>
-                </div>`
-            );
-        }, 400);
-    });
+    setTimeout(() => {
+        form.remove();
+        document.querySelector('.container').insertAdjacentHTML('beforeend', `
+            <div class="success-message">
+                <h2>✅ Заявка отправлена</h2>
+                <p>Мы свяжемся с вами в ближайшее время</p>
+            </div>
+        `);
+    }, 400);
+});
 </script>
 </body>
 </html>
