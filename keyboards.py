@@ -39,6 +39,7 @@ def admin_keyboard(request_id: str):  # ← ИЗМЕНЕНО НА str
         ]
     ])
 
+
 def admin_menu_keyboard():
     """Главное меню админа"""
     return ReplyKeyboardMarkup(

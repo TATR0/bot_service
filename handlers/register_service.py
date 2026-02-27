@@ -12,6 +12,7 @@ router = Router()
 class RegisterService(StatesGroup):
     waiting_name = State()
     waiting_phone = State()
+    waiting_city = State()
     waiting_location = State()
     waiting_admin_id = State()
 
@@ -47,15 +48,31 @@ async def process_service_phone(message: Message, state: FSMContext):
     """Получение номера телефона"""
     phone = message.text.strip()
     
-    # Базовая валидация номера
     if len(phone) < 10:
         await message.answer("❌ Некорректный номер телефона. Попробуйте ещё раз")
         return
     
     await state.update_data(phone=phone)
     await message.answer(
-        "📍 Введите адрес автосервиса:\n\n"
-        "<i>Пример: г. Москва, ул. Пушкина, д. 10</i>",
+        "🏙 Введите город, в котором находится автосервис:\n\n"
+        "<i>Пример: Москва</i>",
+        parse_mode="HTML"
+    )
+    await state.set_state(RegisterService.waiting_city)
+
+@router.message(RegisterService.waiting_city)
+async def process_service_city(message: Message, state: FSMContext):
+    """Получение города сервиса"""
+    city = message.text.strip()
+    
+    if len(city) < 2:
+        await message.answer("❌ Название города должно быть не менее 2 символов")
+        return
+    
+    await state.update_data(city=city)
+    await message.answer(
+        "📍 Введите адрес автосервиса (улица, дом):\n\n"
+        "<i>Пример: ул. Пушкина, д. 10</i>",
         parse_mode="HTML"
     )
     await state.set_state(RegisterService.waiting_location)
@@ -88,7 +105,6 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
     admin_id = None
     admin_display_name = None
 
-    # Проверка на @username
     username_match = re.match(r"^@(\w+)$", user_input)
     if username_match:
         username = username_match.group(1)
@@ -103,7 +119,6 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
                 parse_mode="HTML"
             )
             return
-    # Проверка на user ID
     elif user_input.isdigit():
         admin_id = int(user_input)
         try:
@@ -126,24 +141,24 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
         )
         return
 
-    # Сохранение в БД
     try:
         data = await state.get_data()
         idservice = await db.add_service(
             data['service_name'],
             data['phone'],
-            message.from_user.id,  # owner_id — тот кто регистрирует
-            data['location']  # ← ДОБАВЛЯЕМ АДРЕС
+            message.from_user.id,
+            data['location'],
+            data['city']
         )
         await db.add_admin(idservice, admin_id)
 
-        # Используем новый метод для форматирования сообщения
         success_message = db.format_registration_message(
             data['service_name'],
             data['phone'],
             admin_display_name,
             idservice,
-            data['location']  # ← ПЕРЕДАЕМ АДРЕС
+            data['location'],
+            data['city']
         )
 
         await message.answer(
@@ -152,13 +167,13 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
             reply_markup=start_keyboard()
         )
 
-        # Уведомление администратору
         try:
             await bot.send_message(
                 admin_id,
                 f"👋 Вас добавили администратором автосервиса!\n\n"
                 f"<b>Название:</b> {data['service_name']}\n"
                 f"<b>Телефон:</b> {data['phone']}\n"
+                f"<b>Город:</b> {data['city']}\n"
                 f"<b>Адрес:</b> {data['location']}\n\n"
                 f"Теперь вы можете управлять заявками. Нажмите /start",
                 parse_mode="HTML"
