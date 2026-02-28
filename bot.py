@@ -20,7 +20,7 @@ storage = MemoryStorage()
 dp      = Dispatcher(storage=storage)
 
 # Порт для HTTP-сервера (index.html + API)
-API_PORT = int(os.getenv("API_PORT", "8080"))
+API_PORT = int(os.getenv("PORT", os.getenv("API_PORT", "10000")))
 API_HOST = os.getenv("API_HOST", "0.0.0.0")
 
 
