@@ -134,7 +134,7 @@ async def webapp_handler(message: Message):
 
         # ✅ ОТПРАВЛЯЕМ ПОДТВЕРЖДЕНИЕ КЛИЕНТУ
         await message.answer(
-            "✅ <b>Заявка отправлена!</b>\n\n"
+            "✅ <b>Заяв��а отправлена!</b>\n\n"
             "📞 Администратор свяжется с вами в ближайшее время\n\n"
             f"<b>Номер заявки:</b> <code>{request_id}</code>",
             parse_mode="HTML"

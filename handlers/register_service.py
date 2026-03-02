@@ -105,6 +105,7 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
     admin_id = None
     admin_display_name = None
 
+    # Проверка на @username
     username_match = re.match(r"^@(\w+)$", user_input)
     if username_match:
         username = username_match.group(1)
@@ -119,6 +120,7 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
                 parse_mode="HTML"
             )
             return
+    # Проверка на user ID
     elif user_input.isdigit():
         admin_id = int(user_input)
         try:
@@ -141,24 +143,26 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
         )
         return
 
+    # Сохранение в БД
     try:
         data = await state.get_data()
         idservice = await db.add_service(
             data['service_name'],
             data['phone'],
-            message.from_user.id,
-            data['location'],
-            data['city']
+            message.from_user.id,  # owner_id — тот кто регистрирует
+            data['location'],  # адрес
+            data['city']       # ← ДОБАВЛЯЕМ ГОРОД
         )
         await db.add_admin(idservice, admin_id)
 
+        # Используем новый метод для форматирования сообщения
         success_message = db.format_registration_message(
             data['service_name'],
             data['phone'],
             admin_display_name,
             idservice,
-            data['location'],
-            data['city']
+            data['city'],      # ← ГОРОД
+            data['location']   # ← АДРЕС
         )
 
         await message.answer(
@@ -167,6 +171,7 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
             reply_markup=start_keyboard()
         )
 
+        # Уведомление администратору
         try:
             await bot.send_message(
                 admin_id,
