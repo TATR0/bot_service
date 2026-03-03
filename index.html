@@ -20,11 +20,7 @@
             --gap: 18px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -34,285 +30,305 @@
             color: var(--text-main);
         }
 
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-        }
+        .container { max-width: 480px; margin: 0 auto; }
 
-        .header {
-            text-align: center;
-            padding: 24px 16px 16px;
-        }
-
+        .header { text-align: center; padding: 24px 16px 16px; }
         .header h1 {
-            font-size: 26px;
-            font-weight: 800;
+            font-size: 26px; font-weight: 800;
             background: linear-gradient(135deg, var(--accent), #5ee7ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header p { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+
+        .card {
+            background: var(--bg-card); backdrop-filter: blur(18px);
+            border-radius: var(--radius); padding: 20px; display: flex;
+            flex-direction: column; gap: var(--gap); animation: fadeUp 0.5s ease;
         }
 
-        .header p {
-            font-size: 14px;
-            color: var(--text-muted);
-            margin-top: 6px;
-        }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        form {
-            background: var(--bg-card);
-            backdrop-filter: blur(18px);
-            border-radius: var(--radius);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: var(--gap);
-            animation: fadeUp 0.5s ease;
-        }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 12px; letter-spacing: 0.5px; color: var(--text-muted); text-transform: uppercase; }
+        input, select, textarea, button { padding: 14px; border-radius: 12px; border: 2px solid transparent; background: rgba(255,255,255,0.08); color: #fff; font-size: 15px; transition: all 0.25s ease; }
+        input::placeholder, textarea::placeholder { color: #888; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 0 4px rgba(0,212,255,0.15); }
+        textarea { min-height: 90px; resize: none; }
+        .char-count { text-align: right; font-size: 11px; color: var(--text-muted); }
+        button { margin-top: 8px; padding: 16px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--accent), #5ee7ff); color: #000; font-weight: 800; letter-spacing: 0.6px; cursor: pointer; transition: all 0.25s ease; }
+        button:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0,212,255,0.4); }
+        button:active { transform: scale(0.98); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .services-list { display: flex; flex-direction: column; gap: 8px; }
+        .service-item {
+            padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.03);
+            display:flex; justify-content: space-between; align-items: center; cursor: pointer;
         }
+        .service-item:hover { background: rgba(0,212,255,0.06); }
 
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
+        .success-message { margin-top: 20px; padding: 24px; border-radius: var(--radius); background: var(--accent-soft); text-align: center; animation: fadeUp 0.5s ease; }
+        .success-message h2 { color: var(--accent); margin-bottom: 8px; }
 
-        label {
-            font-size: 12px;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        input,
-        select,
-        textarea {
-            padding: 14px;
-            border-radius: 12px;
-            border: 2px solid transparent;
-            background: rgba(255,255,255,0.08);
-            color: #fff;
-            font-size: 15px;
-            transition: all 0.25s ease;
-        }
-
-        input::placeholder,
-        textarea::placeholder {
-            color: #888;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-            background: var(--accent-soft);
-            box-shadow: 0 0 0 4px rgba(0,212,255,0.15);
-        }
-
-        textarea {
-            min-height: 90px;
-            resize: none;
-        }
-
-        .char-count {
-            text-align: right;
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-
-        button {
-            margin-top: 8px;
-            padding: 16px;
-            border-radius: 14px;
-            border: none;
-            background: linear-gradient(135deg, var(--accent), #5ee7ff);
-            color: #000;
-            font-weight: 800;
-            letter-spacing: 0.6px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-        }
-
-        button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 12px 30px rgba(0,212,255,0.4);
-        }
-
-        button:active {
-            transform: scale(0.98);
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .success-message {
-            margin-top: 20px;
-            padding: 24px;
-            border-radius: var(--radius);
-            background: var(--accent-soft);
-            text-align: center;
-            animation: fadeUp 0.5s ease;
-        }
-
-        .success-message h2 {
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
+        .muted { color: var(--text-muted); font-size: 13px; }
+        .hidden { display: none; }
     </style>
 </head>
 
 <body>
 <div class="container">
-
     <div class="header">
         <h1>🔧 АВТОСЕРВИС</h1>
         <p>Онлайн-запись на обслуживание</p>
     </div>
 
-    <form id="bookingForm">
-
-        <div class="form-group">
-            <label>Ваше имя</label>
-            <input id="name" required placeholder="Иван">
-        </div>
-
-        <div class="form-group">
-            <div class="form-group">
-                <label>Марка</label>
-                <input id="brand" required placeholder="Toyota">
-            </div>
-            <div class="form-group">
-                <label>Модель</label>
-                <input id="model" required placeholder="Camry">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label>Госномер</label>
-            <input id="plate" required placeholder="А777АА77">
-        </div>
-
-        <div class="form-group">
-            <label>Тип работы</label>
-            <select id="service" required>
-                <option value="diagnostic">Диагностика</option>
-                <option value="oil-change">Замена масла</option>
-                <option value="suspension">Подвеска</option>
-                <option value="engine">Двигатель</option>
-                <option value="body">Кузов</option>
-                <option value="other">Другое</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Срочность</label>
-            <select id="urgency" required>
-                <option value="low">Не срочно</option>
-                <option value="medium">3–5 дней</option>
-                <option value="high">1–2 дня</option>
-                <option value="urgent">Сегодня</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Телефон</label>
-            <input id="phone" required placeholder="+7 999 123-45-67">
-        </div>
-
-        <div class="form-group">
-            <label>Комментарий</label>
-            <textarea id="comment" maxlength="500"
-                      placeholder="Опишите проблему..."></textarea>
-            <div class="char-count"><span id="charCount">0</span>/500</div>
-        </div>
-
-        <button type="submit">Отправить заявку</button>
-    </form>
+    <!-- Основная карточка -->
+    <div id="app" class="card">
+        <!-- Контент будет рендериться JS -->
+    </div>
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
-
+    const tg = window.Telegram?.WebApp;
     if (tg) {
         tg.ready();
-        tg.expand();
-
-        if (tg.themeParams.bg_color) {
+        try { tg.expand(); } catch(e){/* ignore */ }
+        if (tg.themeParams?.bg_color) {
             document.documentElement.style.setProperty('--bg-main', tg.themeParams.bg_color);
         }
     }
 
+    // API базовый URL для получения списка сервисов по городу.
+    // Ожидается, что там будет реализован endpoint: GET /api/services?city=Москва
+    const API_BASE = window.location.origin; // при необходимости измените на ваш API-хост
+
+    // Получаем service_id из URL (если есть)
     const urlParams = new URLSearchParams(window.location.search);
-    const serviceId = urlParams.get('service_id');
+    let serviceId = urlParams.get('service_id');
 
-    const form = document.getElementById('bookingForm');
-    const nameInput = document.getElementById('name');
-    const brandInput = document.getElementById('brand');
-    const modelInput = document.getElementById('model');
-    const plateInput = document.getElementById('plate');
-    const serviceInput = document.getElementById('service');
-    const urgencyInput = document.getElementById('urgency');
-    const phoneInput = document.getElementById('phone');
-    const comment = document.getElementById('comment');
-    const charCount = document.getElementById('charCount');
-    const btn = form.querySelector('button');
+    const app = document.getElementById('app');
 
-    comment.addEventListener('input', () => {
-        charCount.textContent = comment.value.length;
-    });
+    // Состояние
+    const state = {
+        serviceId: serviceId || null,
+        selectedService: null,
+        city: ''
+    };
 
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
+    // Render helpers
+    function showCityPicker() {
+        app.innerHTML = `
+            <div>
+                <h2>Выберите город</h2>
+                <p class="muted">Введите город, чтобы увидеть все зарегистрированные сервисы в нём</p>
+                <div class="form-group">
+                    <label>Город</label>
+                    <input id="cityInput" placeholder="Например: Москва" />
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button id="searchBtn">Найти сервисы</button>
+                </div>
+                <div id="servicesContainer" style="margin-top:12px;"></div>
+            </div>
+        `;
+        document.getElementById('searchBtn').addEventListener('click', onSearchCity);
+        document.getElementById('cityInput').addEventListener('keydown', (e)=>{ if (e.key==='Enter') onSearchCity(); });
+    }
 
-        if (!form.checkValidity()) {
-            tg.showAlert('Заполните все обязательные поля');
+    async function onSearchCity() {
+        const cityInput = document.getElementById('cityInput');
+        const city = cityInput.value.trim();
+        if (!city) {
+            tg?.showAlert?.('Введите, пожалуйста, город');
             return;
         }
-
-        if (!serviceId) {
-            tg.showAlert('Ошибка: Service ID не найден. Попробуйте снова.');
-            return;
-        }
-
-        const data = {
-            service_id: serviceId,
-            client_name: nameInput.value,
-            brand: brandInput.value,
-            model: modelInput.value,
-            plate: plateInput.value,
-            service: serviceInput.value,
-            urgency: urgencyInput.value,
-            phone: phoneInput.value,
-            comment: comment.value,
-            user: tg.initDataUnsafe?.user
-        };
-
-        btn.disabled = true;
-        btn.textContent = 'Отправка...';
+        state.city = city;
+        const servicesContainer = document.getElementById('servicesContainer');
+        servicesContainer.innerHTML = '<div class="muted">Загрузка...</div>';
 
         try {
-            tg.sendData(JSON.stringify(data));
-        } catch (error) {
-            console.error('Ошибка при отправке:', error);
+            const resp = await fetch(`${API_BASE}/api/services?city=${encodeURIComponent(city)}`, { method: 'GET' });
+            if (!resp.ok) {
+                throw new Error('Ошибка сети');
+            }
+            const services = await resp.json();
+            renderServicesList(services);
+        } catch (err) {
+            console.error(err);
+            servicesContainer.innerHTML = `<div class="muted">Не удалось получить список сервисов. Попробуйте позже.</div>`;
         }
+    }
 
-        setTimeout(() => {
-            form.remove();
-            document.querySelector('.container').insertAdjacentHTML(
-                'beforeend',
-                `<div class="success-message">
-                    <h2>✅ Заявка отправлена</h2>
-                    <p>Мы свяжемся с вами в ближайшее время</p>
-                </div>`
-            );
-        }, 400);
-    });
+    function renderServicesList(services) {
+        const servicesContainer = document.getElementById('servicesContainer');
+        if (!services || services.length === 0) {
+            servicesContainer.innerHTML = `<div class="muted">Сервисы в городе <b>${escapeHtml(state.city)}</b> не найдены.</div>`;
+            return;
+        }
+        servicesContainer.innerHTML = `
+            <div class="muted">Найдено сервисов: ${services.length}</div>
+            <div class="services-list" id="list"></div>
+        `;
+        const list = document.getElementById('list');
+        services.forEach(s => {
+            const el = document.createElement('div');
+            el.className = 'service-item';
+            el.innerHTML = `<div>
+                                <div><b>${escapeHtml(s.service_name)}</b></div>
+                                <div class="muted">${escapeHtml(s.service_number || '')} ${s.location_service ? ' • ' + escapeHtml(s.location_service) : ''}</div>
+                            </div>
+                            <div><button data-id="${s.idservice}" class="chooseBtn">Выбрать</button></div>`;
+            list.appendChild(el);
+        });
+        document.querySelectorAll('.chooseBtn').forEach(btn => btn.addEventListener('click', (e)=>{
+            const id = e.currentTarget.getAttribute('data-id');
+            state.serviceId = id;
+            state.selectedService = services.find(x => x.idservice === id);
+            showBookingForm();
+        }));
+    }
+
+    function showBookingForm() {
+        const svc = state.selectedService;
+        const svcName = svc ? svc.service_name : '';
+        app.innerHTML = `
+            <div>
+                <h2>Запись ${svcName ? 'в ' + escapeHtml(svcName) : ''}</h2>
+                <p class="muted">Заполните форму, чтобы отправить заявку${state.city ? ' (город: ' + escapeHtml(state.city) + ')' : ''}</p>
+
+                <form id="bookingForm">
+                    <div class="form-group"><label>Ваше имя</label><input id="name" required placeholder="Иван"></div>
+
+                    <div style="display:flex;gap:8px;">
+                        <div style="flex:1" class="form-group"><label>Марка</label><input id="brand" required placeholder="Toyota"></div>
+                        <div style="flex:1" class="form-group"><label>Модель</label><input id="model" required placeholder="Camry"></div>
+                    </div>
+
+                    <div class="form-group"><label>Госномер</label><input id="plate" required placeholder="А777АА77"></div>
+
+                    <div class="form-group">
+                        <label>Тип работы</label>
+                        <select id="service" required>
+                            <option value="diagnostic">Диагностика</option>
+                            <option value="oil-change">Замена масла</option>
+                            <option value="suspension">Подвеска</option>
+                            <option value="engine">Двигатель</option>
+                            <option value="body">Кузов</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Срочность</label>
+                        <select id="urgency" required>
+                            <option value="low">Не срочно</option>
+                            <option value="medium">3–5 дней</option>
+                            <option value="high">1–2 дня</option>
+                            <option value="urgent">Сегодня</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group"><label>Телефон</label><input id="phone" required placeholder="+7 999 123-45-67"></div>
+
+                    <div class="form-group">
+                        <label>Комментарий</label>
+                        <textarea id="comment" maxlength="500" placeholder="Опишите проблему..."></textarea>
+                        <div class="char-count"><span id="charCount">0</span>/500</div>
+                    </div>
+
+                    <div style="display:flex;gap:8px;">
+                        <button id="submitBtn" type="submit">Отправить заявку</button>
+                        <button id="backBtn" type="button">⬅ Выбрать другой сервис</button>
+                    </div>
+                </form>
+            </div>
+        `;
+
+        const form = document.getElementById('bookingForm');
+        const comment = document.getElementById('comment');
+        const charCount = document.getElementById('charCount');
+        const btn = document.getElementById('submitBtn');
+
+        comment.addEventListener('input', () => { charCount.textContent = comment.value.length; });
+        document.getElementById('backBtn').addEventListener('click', () => {
+            // Вернуться к списку сервисов
+            if (state.city) {
+                // Повторно показать найденные сервисы (сделаем новый поиск)
+                onSearchCity();
+            } else {
+                showCityPicker();
+            }
+        });
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!form.checkValidity()) {
+                tg?.showAlert?.('Заполните все обязательные поля');
+                return;
+            }
+
+            if (!state.serviceId) {
+                tg?.showAlert?.('Ошибка: Service ID не выбран. Попробуйте снова.');
+                return;
+            }
+
+            const data = {
+                service_id: state.serviceId,
+                client_name: document.getElementById('name').value,
+                brand: document.getElementById('brand').value,
+                model: document.getElementById('model').value,
+                plate: document.getElementById('plate').value,
+                service: document.getElementById('service').value,
+                urgency: document.getElementById('urgency').value,
+                phone: document.getElementById('phone').value,
+                comment: document.getElementById('comment').value,
+                city: state.city || '',
+                user: tg?.initDataUnsafe?.user
+            };
+
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
+
+            try {
+                tg.sendData(JSON.stringify(data));
+            } catch (error) {
+                console.error('Ошибка при отправке:', error);
+            }
+
+            setTimeout(() => {
+                form.remove();
+                document.querySelector('.container').insertAdjacentHTML(
+                    'beforeend',
+                    `<div class="success-message">
+                        <h2>✅ Заявка отправлена</h2>
+                        <p>Мы свяжемся с вами в ближайшее время</p>
+                    </div>`
+                );
+            }, 400);
+        });
+    }
+
+    function showBookingFormDirect() {
+        // Если веб-приложение открыто с параметром service_id в URL, сразу показать форму
+        state.serviceId = state.serviceId || null;
+        // selectedService остаётся null — имя сервиса мы не знаем на клиенте, но это не обязательно.
+        showBookingForm();
+    }
+
+    // Если у нас есть service_id в URL — сразу форма, иначе — выбор города
+    if (state.serviceId) {
+        showBookingFormDirect();
+    } else {
+        showCityPicker();
+    }
+
+    // Утилиты
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, function (m) {
+            return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m];
+        });
+    }
 </script>
 </body>
 </html>

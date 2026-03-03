@@ -149,5 +149,16 @@ class Database:
                 "SELECT * FROM requests WHERE idservice = $1 ORDER BY createdate DESC",
                 idservice
             )
+        
+    async def get_services_by_city(self, city: str) -> list:
+        """Получить все сервисы в указанном городе (регистронезависимо)"""
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(
+                """SELECT idservice, service_name, service_number, location_service, city
+                   FROM services
+                   WHERE LOWER(city) = LOWER($1)
+                   ORDER BY service_name""",
+                city
+            )
 
 db = Database()
