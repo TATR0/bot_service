@@ -5,6 +5,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from config import BOT_TOKEN
 from database import db
 from handlers import register_service, service_link, client_request, main
+import os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,6 +19,25 @@ dp = Dispatcher(storage=storage)
 
 async def on_startup():
     await db.connect()
+
+    # ✅ Проверка переменных окружения при старте
+    url = os.getenv("BASE_WEBAPP_URL")
+    bot_username = os.getenv("BOT_USERNAME")
+    master_chat = os.getenv("MASTER_CHAT_ID")
+
+    logger.info("========== КОНФИГУРАЦИЯ ==========")
+    logger.info(f"BASE_WEBAPP_URL  = {repr(url)}")
+    logger.info(f"BOT_USERNAME     = {repr(bot_username)}")
+    logger.info(f"MASTER_CHAT_ID   = {repr(master_chat)}")
+    logger.info("===================================")
+
+    if not url:
+        logger.error("❌ BASE_WEBAPP_URL не задана! Кнопка WebApp работать не будет.")
+    elif not url.startswith("https://"):
+        logger.error(f"❌ BASE_WEBAPP_URL должна начинаться с https://. Текущее значение: {repr(url)}")
+    else:
+        logger.info("✅ BASE_WEBAPP_URL корректна")
+
     logger.info("✅ Бот запущен и БД подключена")
 
 async def on_shutdown():
