@@ -7,15 +7,21 @@ from config import URL_SITE
 # ===== ОСНОВНЫЕ КНОПКИ =====
 def start_keyboard():
     """Главное меню"""
-    return ReplyKeyboardMarkup(
-        keyboard=[[
-            KeyboardButton(
-                text="🚗 Записаться в автосервис",
-                web_app=WebAppInfo(url=URL_SITE)
-            )
-        ]],
-        resize_keyboard=True
-    )
+    if URL_SITE:
+        return ReplyKeyboardMarkup(
+            keyboard=[[
+                KeyboardButton(
+                    text="🚗 Записаться в автосервис",
+                    web_app=WebAppInfo(url=URL_SITE)
+                )
+            ]],
+            resize_keyboard=True
+        )
+    else:
+        return ReplyKeyboardMarkup(
+            keyboard=[[KeyboardButton(text="🚗 Записаться в автосервис")]],
+            resize_keyboard=True
+        )
 
 def register_service_keyboard():
     """Меню для неавторизованного админа"""
@@ -27,7 +33,7 @@ def register_service_keyboard():
     )
 
 # ===== АДМИН КНОПКИ =====
-def admin_keyboard(request_id: str):  # ← ИЗМЕНЕНО НА str
+def admin_keyboard(request_id: str):
     """Кнопки для обновления статуса заявки"""
     return InlineKeyboardMarkup(inline_keyboard=[
         [
