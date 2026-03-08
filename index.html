@@ -1,84 +1,187 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>АвтоСервис — Запись</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#0a0a0f;--surface:#111118;--surface2:#18181f;--border:rgba(255,255,255,0.07);--accent:#e8ff47;--accent-dim:rgba(232,255,71,0.12);--text:#f0f0f0;--muted:#5a5a6e;--muted2:#3a3a4a;--radius:16px;--radius-sm:10px}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Manrope",sans-serif;background:var(--bg);min-height:100vh;color:var(--text);overflow-x:hidden}
-body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(rgba(232,255,71,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(232,255,71,0.015) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-.container{max-width:440px;margin:0 auto;padding:0 16px 40px;position:relative;z-index:1}
-.header{padding:28px 0 20px;display:flex;align-items:center;gap:14px}
-.header-icon{width:44px;height:44px;background:var(--accent);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.header-title{font-family:"Bebas Neue",sans-serif;font-size:28px;letter-spacing:2px;line-height:1}
-.header-sub{font-size:12px;color:var(--muted);margin-top:3px}
-.divider{height:1px;background:var(--border);margin-bottom:20px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;animation:fadeUp 0.4s ease both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.badge{display:inline-block;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(232,255,71,0.2);border-radius:6px;font-size:10px;font-weight:700;padding:3px 8px;letter-spacing:.5px;margin-bottom:14px}
-.section-title{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:1.5px;margin-bottom:4px}
-.section-sub{font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.5}
-.form-stack{display:flex;flex-direction:column;gap:14px}
-.form-group{display:flex;flex-direction:column;gap:6px}
-.form-row{display:flex;gap:10px}
-.form-row .form-group{flex:1}
-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:"Manrope",sans-serif;font-size:14px;padding:12px 14px;transition:border-color .2s,background .2s;width:100%}
-input::placeholder,textarea::placeholder{color:var(--muted2)}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);background:rgba(232,255,71,0.04)}
-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a5a6e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:38px;cursor:pointer}
-select option{background:#18181f}
-textarea{min-height:80px;resize:none;line-height:1.5}
-.char-count{text-align:right;font-size:10px;color:var(--muted);margin-top:2px}
-.btn{display:flex;align-items:center;justify-content:center;border:none;border-radius:var(--radius-sm);font-family:"Manrope",sans-serif;font-size:14px;font-weight:700;cursor:pointer;padding:14px 18px;transition:all .2s;width:100%}
-.btn-primary{background:var(--accent);color:#0a0a0f}
-.btn-primary:hover{background:#d4eb2e;transform:translateY(-1px)}
-.btn-primary:active{transform:scale(.98)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
-.btn-secondary{background:var(--surface2);color:var(--muted);border:1px solid var(--border)}
-.btn-secondary:hover{border-color:rgba(255,255,255,.15);color:var(--text)}
-.search-wrap{display:flex;gap:10px;margin-bottom:16px}
-.search-wrap input{flex:1}
-.search-wrap .btn{flex:0 0 auto;width:auto;padding:12px 18px;font-size:13px}
-.btn-row{display:flex;gap:10px;margin-top:4px}
-.btn-row .btn-secondary{flex:0 0 auto;width:auto;padding:14px 18px}
-.btn-row .btn-primary{flex:1}
-.services-list{display:flex;flex-direction:column;gap:8px}
-.service-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;transition:border-color .2s,background .2s;animation:fadeUp .3s ease both}
-.service-item:hover{border-color:rgba(232,255,71,.3);background:rgba(232,255,71,.04)}
-.service-name{font-weight:600;font-size:14px;margin-bottom:3px}
-.service-meta{font-size:12px;color:var(--muted)}
-.choose-btn{flex-shrink:0;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(232,255,71,.25);border-radius:8px;font-family:"Manrope",sans-serif;font-size:12px;font-weight:700;padding:8px 14px;cursor:pointer;transition:all .2s}
-.choose-btn:hover{background:rgba(232,255,71,.2);border-color:var(--accent)}
-.status-msg{padding:14px;border-radius:var(--radius-sm);font-size:13px;text-align:center;animation:fadeUp .3s ease both}
-.status-loading{background:var(--surface2);color:var(--muted)}
-.status-empty{background:var(--surface2);border:1px solid var(--border);color:var(--muted)}
-.status-error{background:rgba(255,71,71,.08);border:1px solid rgba(255,71,71,.2);color:#ff7b7b}
-.success-wrap{text-align:center;padding:32px 20px;animation:fadeUp .5s ease both}
-.success-icon{width:64px;height:64px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 20px;color:#0a0a0f;font-weight:700}
-.success-title{font-family:"Bebas Neue",sans-serif;font-size:28px;letter-spacing:1.5px;margin-bottom:8px}
-.success-sub{font-size:13px;color:var(--muted);line-height:1.6}
-.muted{color:var(--muted);font-size:13px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автосервис — запись</title>
+
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #0f1224;
+            --bg-card: rgba(255,255,255,0.06);
+            --accent: #00d4ff;
+            --accent-soft: rgba(0,212,255,0.15);
+            --text-main: #ffffff;
+            --text-muted: #9aa0b3;
+            --radius: 14px;
+            --gap: 18px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: radial-gradient(circle at top, #1a1f3c, var(--bg-main));
+            min-height: 100vh;
+            padding: 16px;
+            color: var(--text-main);
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 24px 16px 16px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #5ee7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        form {
+            background: var(--bg-card);
+            backdrop-filter: blur(18px);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: var(--gap);
+            animation: fadeUp 0.5s ease;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        label {
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        input,
+        select,
+        textarea {
+            padding: 14px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font-size: 15px;
+            transition: all 0.25s ease;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #888;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--accent-soft);
+            box-shadow: 0 0 0 4px rgba(0,212,255,0.15);
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: none;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        button {
+            margin-top: 8px;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), #5ee7ff);
+            color: #000;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 30px rgba(0,212,255,0.4);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            margin-top: 20px;
+            padding: 24px;
+            border-radius: var(--radius);
+            background: var(--accent-soft);
+            text-align: center;
+            animation: fadeUp 0.5s ease;
+        }
+
+        .success-message h2 {
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+    </style>
 </head>
+
 <body>
 <div class="container">
     <div class="header">
-        <div class="header-icon">🔧</div>
-        <div>
-            <div class="header-title">АвтоСервис</div>
-            <div class="header-sub">Онлайн-запись на обслуживание</div>
-        </div>
+        <h1>🔧 АВТОСЕРВИС</h1>
+        <p>Онлайн-запись на обслуживание</p>
     </div>
-    <div class="divider"></div>
-    <div id="app"></div>
+
+    <!-- Основная карточка -->
+    <div id="app" class="card">
+        <!-- Контент будет рендериться JS -->
+    </div>
 </div>
+
 <script>
-const tg = window.Telegram?.WebApp;
+    const tg = window.Telegram?.WebApp;
     if (tg) {
         tg.ready();
         try { tg.expand(); } catch(e){/* ignore */ }
@@ -111,10 +214,10 @@ const tg = window.Telegram?.WebApp;
                 <h2>Выберите город</h2>
                 <p class="muted">Введите город, чтобы увидеть все зарегистрированные сервисы в нём</p>
                 <div class="form-group">
-                    <label>Город</label>
+                    <label style = "margin-top:20px;">Город</label>
                     <input id="cityInput" placeholder="Например: Москва" />
                 </div>
-                <div style="display:flex;gap:8px;">
+                <div style="display:flex;gap:8px;margin-top:10px;">
                     <button id="searchBtn">Найти сервисы</button>
                 </div>
                 <div id="servicesContainer" style="margin-top:12px;"></div>
@@ -182,14 +285,13 @@ const tg = window.Telegram?.WebApp;
         const svcName = svc ? svc.service_name : '';
         app.innerHTML = `
             <div>
-                <h2>Запись ${svcName ? 'в ' + escapeHtml(svcName) : ''}</h2>
-                <p class="muted">Заполните форму, чтобы отправить заявку${state.city ? ' (город: ' + escapeHtml(state.city) + ')' : ''}</p>
-
-                <form id="bookingForm">
+                    <form id="bookingForm">
                     <div class="form-group"><label>Ваше имя</label><input id="name" required placeholder="Иван"></div>
 
                     <div style="display:flex;gap:8px;">
                         <div style="flex:1" class="form-group"><label>Марка</label><input id="brand" required placeholder="Toyota"></div>
+                    </div>
+                    <div style="display:flex;gap:8px;">    
                         <div style="flex:1" class="form-group"><label>Модель</label><input id="model" required placeholder="Camry"></div>
                     </div>
 
