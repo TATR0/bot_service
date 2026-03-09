@@ -113,7 +113,7 @@ class Database:
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'new')""",
                 idrequest, idservice, client_name, phone, brand, model, plate,
                 service_type, urgency, comment,
-                str(client_tg_id)  # ✅ FIX 3: приводим int → str, т.к. колонка TEXT
+                client_tg_id  # ✅ FIX 3: приводим int → str, т.к. колонка TEXT
             )
         return idrequest
 
