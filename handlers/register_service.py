@@ -195,4 +195,104 @@ async def process_admin_id(message: Message, state: FSMContext, bot):
         )
 
     await state.clear()
-    
+
+# ===== ДОБАВЛЕНИЕ АДМИНА К СУЩЕСТВУЮЩЕМУ СЕРВИСУ =====
+class AddAdmin(StatesGroup):
+    waiting_service_id = State()
+    waiting_admin_id = State()
+
+@router.message(Command("add_admin"))
+async def add_admin_start(message: Message, state: FSMContext):
+    """Добавить администратора к существующему сервису"""
+    services = await db.get_admin_services(message.from_user.id)
+    if not services:
+        await message.answer(
+            "❌ У вас нет зарегистрированных сервисов\n\n"
+            "Сначала зарегистрируйте сервис через /register_service",
+            parse_mode="HTML"
+        )
+        return
+
+    svc_list = "\n".join([f"• <code>{s['idservice']}</code> — {s['service_name']}" for s in services])
+    await message.answer(
+        f"👥 <b>Добавление администратора</b>\n\n"
+        f"Ваши сервисы:\n{svc_list}\n\n"
+        f"Введите <b>ID сервиса</b> (скопируйте из списка выше):",
+        parse_mode="HTML"
+    )
+    await state.set_state(AddAdmin.waiting_service_id)
+
+@router.message(AddAdmin.waiting_service_id)
+async def add_admin_service_id(message: Message, state: FSMContext):
+    service_id = message.text.strip()
+    # Проверяем что этот сервис принадлежит пользователю
+    services = await db.get_admin_services(message.from_user.id)
+    ids = [s['idservice'] for s in services]
+    if service_id not in ids:
+        await message.answer("❌ Сервис с таким ID не найден среди ваших сервисов. Попробуйте ещё раз.")
+        return
+    await state.update_data(service_id=service_id)
+    await message.answer(
+        "👤 Введите нового администратора:\n\n"
+        "• <code>@username</code>\n"
+        "• <code>123456789</code> (user ID из @userinfobot)",
+        parse_mode="HTML"
+    )
+    await state.set_state(AddAdmin.waiting_admin_id)
+
+@router.message(AddAdmin.waiting_admin_id)
+async def add_admin_finish(message: Message, state: FSMContext, bot):
+    user_input = message.text.strip()
+    admin_id = None
+
+    username_match = re.match(r"^@(\w+)$", user_input)
+    if username_match:
+        try:
+            user = await bot.get_chat(username_match.group(1))
+            admin_id = user.id
+        except Exception:
+            await message.answer("❌ Пользователь не найден. Проверьте username.")
+            return
+    elif user_input.isdigit():
+        admin_id = int(user_input)
+        try:
+            await bot.get_chat(admin_id)
+        except Exception:
+            await message.answer("❌ Пользователь с таким ID не найден.")
+            return
+    else:
+        await message.answer("❌ Некорректный формат. Используйте @username или числовой ID.")
+        return
+
+    data = await state.get_data()
+    service_id = data['service_id']
+
+    # Проверяем, не является ли уже администратором
+    existing = await db.get_admins_by_service(service_id)
+    if any(a['idusertg'] == admin_id for a in existing):
+        await message.answer("⚠️ Этот пользователь уже является администратором этого сервиса.")
+        await state.clear()
+        return
+
+    await db.add_admin(service_id, admin_id)
+
+    # Уведомляем нового админа
+    try:
+        services = await db.get_admin_services(message.from_user.id)
+        svc = next((s for s in services if s['idservice'] == service_id), None)
+        svc_name = svc['service_name'] if svc else "сервис"
+        await bot.send_message(
+            admin_id,
+            f"👋 Вас добавили администратором!\n\n"
+            f"<b>Сервис:</b> {svc_name}\n\n"
+            f"Нажмите /start для управления заявками.",
+            parse_mode="HTML"
+        )
+    except Exception as e:
+        print(f"Не удалось уведомить нового админа: {e}")
+
+    await message.answer(
+        f"✅ Администратор <code>{admin_id}</code> успешно добавлен!",
+        parse_mode="HTML"
+    )
+    await state.clear()

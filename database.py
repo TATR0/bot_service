@@ -45,6 +45,15 @@ class Database:
                 owner_id
             )
 
+
+    async def get_service_by_id(self, idservice: str):
+        """Получить сервис по idservice"""
+        async with self.pool.acquire() as conn:
+            return await conn.fetchrow(
+                "SELECT idservice, service_name, service_number, location_service, city FROM services WHERE idservice = $1",
+                idservice
+            )
+
     def generate_service_link(self, idservice: str) -> str:
         # ✅ FIX 2: strip() убирает пробел из BOT_USERNAME (был 'CitatAlcw_bot ')
         bot_username = BOT_USERNAME.strip()

@@ -170,7 +170,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>🔧 АВТОСЕРВИС</h1>
+        <h1 id="pageTitle">🔧 АВТОСЕРВИС</h1>
         <p>Онлайн-запись на обслуживание</p>
     </div>
 
@@ -327,10 +327,7 @@
                         <div class="char-count"><span id="charCount">0</span>/500</div>
                     </div>
 
-                    <div style="display:flex;gap:8px;">
-                        <button id="submitBtn" type="submit">Отправить заявку</button>
-                        <button id="backBtn" type="button">⬅ Выбрать другой сервис</button>
-                    </div>
+                    <button id="submitBtn" type="submit">Отправить заявку</button>
                 </form>
             </div>
         `;
@@ -341,16 +338,6 @@
         const btn = document.getElementById('submitBtn');
 
         comment.addEventListener('input', () => { charCount.textContent = comment.value.length; });
-        document.getElementById('backBtn').addEventListener('click', () => {
-            // Вернуться к списку сервисов
-            if (state.city) {
-                // Повторно показать найденные сервисы (сделаем новый поиск)
-                onSearchCity();
-            } else {
-                showCityPicker();
-            }
-        });
-
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             if (!form.checkValidity()) {
@@ -400,15 +387,26 @@
     }
 
     function showBookingFormDirect() {
-        // Если веб-приложение открыто с параметром service_id в URL, сразу показать форму
-        state.serviceId = state.serviceId || null;
-        // selectedService остаётся null — имя сервиса мы не знаем на клиенте, но это не обязательно.
+        if (state.selectedService && state.selectedService.service_name) {
+            const el = document.getElementById('pageTitle');
+            if (el) el.textContent = '🔧 ' + state.selectedService.service_name.toUpperCase();
+        }
         showBookingForm();
     }
 
     // Если у нас есть service_id в URL — сразу форма, иначе — выбор города
     if (state.serviceId) {
-        showBookingFormDirect();
+        // ✅ Загружаем название сервиса перед показом формы
+        (async () => {
+            try {
+                const resp = await fetch(`${API_BASE}/api/service/${state.serviceId}`);
+                if (resp.ok) {
+                    const svc = await resp.json();
+                    state.selectedService = svc;
+                }
+            } catch(e) { /* не критично */ }
+            showBookingFormDirect();
+        })();
     } else {
         showCityPicker();
     }
