@@ -103,3 +103,4 @@ async def fallback(message: Message):
         "Используйте /start для начала",
         reply_markup=start_keyboard()
     )
+    

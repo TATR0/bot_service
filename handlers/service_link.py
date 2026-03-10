@@ -75,3 +75,4 @@ async def start_with_service_link(message: Message):
             parse_mode="HTML",
             reply_markup=start_keyboard()
         )
+        

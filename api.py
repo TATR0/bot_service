@@ -40,3 +40,4 @@ async def services_by_city(city: str = Query(..., min_length=1)):
 
 if __name__ == "__main__":
     uvicorn.run("api:app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=True)
+    
