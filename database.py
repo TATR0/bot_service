@@ -101,6 +101,17 @@ class Database:
                 admin_id
             )
 
+
+    async def get_owned_services(self, owner_id: int) -> list:
+        """Получить сервисы где пользователь является владельцем (owner_id)"""
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(
+                """SELECT idservice, service_name, service_number, location_service, city
+                   FROM services WHERE owner_id = $1
+                   ORDER BY service_name""",
+                owner_id
+            )
+
     async def get_admins_by_service(self, service_id: str) -> list:
         async with self.pool.acquire() as conn:
             return await conn.fetch(

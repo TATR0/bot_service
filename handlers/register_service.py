@@ -174,22 +174,22 @@ class AddAdmin(StatesGroup):
 
 @router.message(Command("add_admin"))
 async def add_admin_start(message: Message, state: FSMContext):
-    services = await db.get_admin_services(message.from_user.id)
-    if not services:
+    # ✅ Только владелец (owner_id) может добавлять админов
+    owned = await db.get_owned_services(message.from_user.id)
+    if not owned:
         await message.answer(
-            "❌ У вас нет зарегистрированных сервисов\n\n"
-            "Сначала зарегистрируйте сервис через /register_service",
+            "❌ У вас нет сервисов, которыми вы управляете."
+            "Добавлять администраторов может только тот, кто зарегистрировал сервис.",
             parse_mode="HTML"
         )
         return
 
-    # Сохраняем список ID чтобы потом проверять
-    valid_ids = [str(s["idservice"]) for s in services]
+    valid_ids = [str(s["idservice"]) for s in owned]
     await state.update_data(valid_ids=valid_ids)
 
     svc_list = "\n".join([
         f"• <code>{s['idservice']}</code>\n  {s['service_name']}"
-        for s in services
+        for s in owned
     ])
     await message.answer(
         f"👥 <b>Добавление администратора</b>\n\n"
