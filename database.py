@@ -8,13 +8,8 @@ class Database:
 
     async def connect(self):
         self.pool = await asyncpg.create_pool(
-            user=PG_USER,
-            password=PG_PASSWORD,
-            database=PG_DB,
-            host=PG_HOST,
-            port=PG_PORT,
-            min_size=5,
-            max_size=20
+            user=PG_USER, password=PG_PASSWORD, database=PG_DB,
+            host=PG_HOST, port=PG_PORT, min_size=5, max_size=20
         )
         print("✅ БД подключена")
 
@@ -27,12 +22,10 @@ class Database:
     async def add_service(self, service_name: str, phone: str, owner_id: int,
                           location: str = "", city: str = "") -> str:
         idservice = str(uuid4())
-        # ✅ FIX 1: strip() убирает лишние пробелы из города
         async with self.pool.acquire() as conn:
             await conn.execute(
                 """INSERT INTO services (idservice, service_name, service_number, owner_id,
-                   location_service, city)
-                   VALUES ($1, $2, $3, $4, $5, $6)""",
+                   location_service, city) VALUES ($1, $2, $3, $4, $5, $6)""",
                 idservice, service_name.strip(), phone.strip(),
                 owner_id, location.strip(), city.strip()
             )
@@ -41,23 +34,19 @@ class Database:
     async def get_service_by_owner(self, owner_id: int):
         async with self.pool.acquire() as conn:
             return await conn.fetchrow(
-                "SELECT idservice FROM services WHERE owner_id = $1",
-                owner_id
+                "SELECT idservice FROM services WHERE owner_id = $1", owner_id
             )
 
-
     async def get_service_by_id(self, idservice: str):
-        """Получить сервис по idservice"""
         async with self.pool.acquire() as conn:
             return await conn.fetchrow(
-                "SELECT idservice, service_name, service_number, location_service, city FROM services WHERE idservice = $1",
+                """SELECT idservice, service_name, service_number, location_service, city
+                   FROM services WHERE idservice = $1""",
                 idservice
             )
 
     def generate_service_link(self, idservice: str) -> str:
-        # ✅ FIX 2: strip() убирает пробел из BOT_USERNAME (был 'CitatAlcw_bot ')
-        bot_username = BOT_USERNAME.strip()
-        return f"https://t.me/{bot_username}?start=SVC_{idservice}"
+        return f"https://t.me/{BOT_USERNAME.strip()}?start=SVC_{idservice}"
 
     def format_registration_message(self, service_name: str, phone: str,
                                     admin_name: str, idservice: str,
@@ -82,42 +71,77 @@ class Database:
 
     # ===== АДМИНИСТРАТОРЫ =====
     async def add_admin(self, idservice: str, idusertg: int):
-        idadmin = str(uuid4())
+        """
+        Добавить администратора.
+        Если запись уже существует (даже с idrecstatus=-1) — восстанавливаем её.
+        Если нет — создаём новую.
+        """
+        async with self.pool.acquire() as conn:
+            existing = await conn.fetchrow(
+                "SELECT idadmins FROM admins WHERE idservice = $1 AND idusertg = $2",
+                idservice, idusertg
+            )
+            if existing:
+                # Запись есть — просто активируем
+                await conn.execute(
+                    "UPDATE admins SET idrecstatus = 0 WHERE idservice = $1 AND idusertg = $2",
+                    idservice, idusertg
+                )
+                return existing['idadmins']
+            else:
+                # Новая запись
+                idadmin = str(uuid4())
+                await conn.execute(
+                    """INSERT INTO admins (idadmins, idservice, idusertg, idrecstatus)
+                       VALUES ($1, $2, $3, 0)""",
+                    idadmin, idservice, idusertg
+                )
+                return idadmin
+
+    async def remove_admin(self, idservice: str, idusertg: int):
+        """Мягкое удаление: idrecstatus = -1"""
         async with self.pool.acquire() as conn:
             await conn.execute(
-                """INSERT INTO admins (idadmins, idservice, idusertg)
-                   VALUES ($1, $2, $3)""",
-                idadmin, idservice, idusertg
+                "UPDATE admins SET idrecstatus = -1 WHERE idservice = $1 AND idusertg = $2",
+                idservice, idusertg
             )
-        return idadmin
 
     async def get_admin_services(self, admin_id: int) -> list:
+        """Только активные сервисы (idrecstatus = 0)"""
         async with self.pool.acquire() as conn:
             return await conn.fetch(
                 """SELECT s.idservice, s.service_name, s.service_number, s.location_service
                    FROM services s
                    JOIN admins a ON s.idservice = a.idservice
-                   WHERE a.idusertg = $1""",
+                   WHERE a.idusertg = $1 AND a.idrecstatus = 0""",
                 admin_id
             )
 
-
     async def get_owned_services(self, owner_id: int) -> list:
-        """Получить сервисы где пользователь является владельцем (owner_id)"""
         async with self.pool.acquire() as conn:
             return await conn.fetch(
                 """SELECT idservice, service_name, service_number, location_service, city
-                   FROM services WHERE owner_id = $1
-                   ORDER BY service_name""",
+                   FROM services WHERE owner_id = $1 ORDER BY service_name""",
                 owner_id
             )
 
     async def get_admins_by_service(self, service_id: str) -> list:
+        """Только активные администраторы (idrecstatus = 0)"""
         async with self.pool.acquire() as conn:
             return await conn.fetch(
                 """SELECT a.idadmins, a.idservice, a.idusertg
                    FROM admins a
-                   WHERE a.idservice = $1""",
+                   WHERE a.idservice = $1 AND a.idrecstatus = 0""",
+                service_id
+            )
+
+    async def get_all_admins_by_service(self, service_id: str) -> list:
+        """Все администраторы включая удалённых (для отображения списка)"""
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(
+                """SELECT a.idadmins, a.idservice, a.idusertg, a.idrecstatus
+                   FROM admins a
+                   WHERE a.idservice = $1 AND a.idrecstatus = 0""",
                 service_id
             )
 
@@ -132,34 +156,29 @@ class Database:
                 plate, service_type, urgency, comment, idclienttg, status)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'new')""",
                 idrequest, idservice, client_name, phone, brand, model, plate,
-                service_type, urgency, comment,
-                client_tg_id  # ✅ FIX 3: приводим int → str, т.к. колонка TEXT
+                service_type, urgency, comment, client_tg_id
             )
         return idrequest
 
     async def get_request(self, idrequest: str):
         async with self.pool.acquire() as conn:
             return await conn.fetchrow(
-                "SELECT * FROM requests WHERE idrequests = $1",
-                idrequest
+                "SELECT * FROM requests WHERE idrequests = $1", idrequest
             )
 
     async def update_request_status(self, idrequest: str, status: str):
         async with self.pool.acquire() as conn:
             await conn.execute(
-                "UPDATE requests SET status = $1 WHERE idrequests = $2",
-                status, idrequest
+                "UPDATE requests SET status = $1 WHERE idrequests = $2", status, idrequest
             )
 
     async def get_service_requests(self, idservice: str) -> list:
         async with self.pool.acquire() as conn:
             return await conn.fetch(
-                "SELECT * FROM requests WHERE idservice = $1 ORDER BY createdate DESC",
-                idservice
+                "SELECT * FROM requests WHERE idservice = $1 ORDER BY createdate DESC", idservice
             )
 
     async def get_services_by_city(self, city: str) -> list:
-        # ✅ FIX 1: strip() на входящем городе + TRIM в SQL для данных в БД
         async with self.pool.acquire() as conn:
             return await conn.fetch(
                 """SELECT idservice, service_name, service_number, location_service, city

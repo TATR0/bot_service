@@ -2,6 +2,7 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import BotCommand, BotCommandScopeDefault
 from config import BOT_TOKEN
 from database import db
 from handlers import register_service, service_link, client_request, main
@@ -20,7 +21,11 @@ dp = Dispatcher(storage=storage)
 async def on_startup():
     await db.connect()
 
-    # ✅ Проверка переменных окружения при старте
+    # ✅ Убираем кнопку меню и все команды из интерфейса
+    await bot.delete_my_commands(scope=BotCommandScopeDefault())
+    await bot.set_chat_menu_button()  # сбрасывает кнопку меню на дефолт (убирает список)
+    logger.info("✅ Меню команд очищено")
+
     url = os.getenv("BASE_WEBAPP_URL")
     bot_username = os.getenv("BOT_USERNAME")
     master_chat = os.getenv("MASTER_CHAT_ID")
@@ -32,9 +37,9 @@ async def on_startup():
     logger.info("===================================")
 
     if not url:
-        logger.error("❌ BASE_WEBAPP_URL не задана! Кнопка WebApp работать не будет.")
+        logger.error("❌ BASE_WEBAPP_URL не задана!")
     elif not url.startswith("https://"):
-        logger.error(f"❌ BASE_WEBAPP_URL должна начинаться с https://. Текущее значение: {repr(url)}")
+        logger.error(f"❌ BASE_WEBAPP_URL должна начинаться с https://")
     else:
         logger.info("✅ BASE_WEBAPP_URL корректна")
 
@@ -64,4 +69,3 @@ async def main_async():
 
 if __name__ == "__main__":
     asyncio.run(main_async())
-    
