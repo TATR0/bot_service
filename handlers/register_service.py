@@ -184,7 +184,7 @@ async def add_admin_start(message: Message, state: FSMContext):
         return
 
     # Сохраняем список ID чтобы потом проверять
-    valid_ids = [s['idservice'] for s in services]
+    valid_ids = [str(s["idservice"]) for s in services]
     await state.update_data(valid_ids=valid_ids)
 
     svc_list = "\n".join([
@@ -206,11 +206,12 @@ async def add_admin_service_id(message: Message, state: FSMContext):
     valid_ids = data.get('valid_ids', [])
 
     if service_id not in valid_ids:
-        # Показываем что получили для отладки
+        ids_str = "\n".join([f"<code>{i}</code>" for i in valid_ids])
         await message.answer(
-            f"❌ ID не найден среди ваших сервисов.\n\n"
+            f"❌ ID не найден.\n\n"
             f"Вы отправили: <code>{service_id}</code>\n\n"
-            f"Нажмите на ID в списке выше чтобы скопировать его точно.",
+            f"Доступные ID:\n{ids_str}\n\n"
+            f"Скопируйте ID точно из этого списка.",
             parse_mode="HTML"
         )
         return
