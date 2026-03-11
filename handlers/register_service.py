@@ -179,7 +179,7 @@ async def add_admin_start(message: Message, state: FSMContext):
     if not owned:
         await message.answer(
             "❌ У вас нет сервисов, которыми вы управляете."
-            "Добавлять администраторов может только тот, кто зарегистрировал сервис.",
+            "Добавлять администраторов может только управляющий",
             parse_mode="HTML"
         )
         return
