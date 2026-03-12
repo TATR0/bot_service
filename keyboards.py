@@ -57,7 +57,6 @@ def admin_menu_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="📋 Мои заявки")],
-            [KeyboardButton(text="📝 Зарегистрировать новый сервис")],
             [KeyboardButton(text="ℹ️ О моем сервисе")]
         ],
         resize_keyboard=True

@@ -70,9 +70,7 @@ async def start_with_service_link(message: Message):
         from keyboards import start_keyboard
         logger.info(f"👥 Пользователь {message.from_user.id} - клиент")
         await message.answer(
-            "🚗 <b>Добро пожаловать в систему записи автосервиса!</b>\n\n"
-            "🔧 Чтобы подключить автосервис — нажмите /register_service",
+            "🚗 <b>Добро пожаловать в систему записи автосервиса!</b>\n\n",
             parse_mode="HTML",
             reply_markup=start_keyboard()
         )
-        

@@ -147,3 +147,4 @@ async def webapp_handler(message: Message):
     except Exception as e:
         logger.error(f"❌ Ошибка при обработке заявки: {type(e).__name__}: {e}", exc_info=True)
         await message.answer(f"❌ Ошибка при отправке заявки: {str(e)}")
+        

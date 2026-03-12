@@ -29,6 +29,7 @@ SERVICE_NAMES = {
     "other": "Другое"
 }
 
+
 URGENCY_NAMES = {
     "low": "Обычный (7+ дней)",
     "medium": "Средний (3-5 дней)",
