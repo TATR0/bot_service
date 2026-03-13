@@ -22,8 +22,8 @@ async def on_startup():
     await db.connect()
 
     # ✅ Убираем кнопку меню и все команды из интерфейса
-    await bot.delete_my_commands(scope=BotCommandScopeDefault())
-    await bot.set_chat_menu_button()  # сбрасывает кнопку меню на дефолт (убирает список)
+    # await bot.delete_my_commands(scope=BotCommandScopeDefault())
+    # await bot.set_chat_menu_button()  # сбрасывает кнопку меню на дефолт (убирает список)
     logger.info("✅ Меню команд очищено")
 
     url = os.getenv("BASE_WEBAPP_URL")
