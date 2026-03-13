@@ -18,6 +18,25 @@ class Database:
             await self.pool.close()
             print("❌ БД отключена")
 
+    # ===== РОЛИ =====
+    async def is_owner(self, user_id: int) -> bool:
+        """Проверяет, является ли пользователь управляющим хотя бы одного сервиса"""
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
+                "SELECT 1 FROM services WHERE owner_id = $1 LIMIT 1", user_id
+            )
+            return row is not None
+
+    async def is_admin(self, user_id: int) -> bool:
+        """Проверяет, является ли пользователь активным администратором (но не управляющим)"""
+        async with self.pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """SELECT 1 FROM admins
+                   WHERE idusertg = $1 AND idrecstatus = 0 LIMIT 1""",
+                user_id
+            )
+            return row is not None
+
     # ===== СЕРВИСЫ =====
     async def add_service(self, service_name: str, phone: str, owner_id: int,
                           location: str = "", city: str = "") -> str:
@@ -136,7 +155,7 @@ class Database:
             )
 
     async def get_all_admins_by_service(self, service_id: str) -> list:
-        """Все администраторы включая удалённых (для отображения списка)"""
+        """Все активные администраторы для отображения списка"""
         async with self.pool.acquire() as conn:
             return await conn.fetch(
                 """SELECT a.idadmins, a.idservice, a.idusertg, a.idrecstatus
@@ -176,6 +195,16 @@ class Database:
         async with self.pool.acquire() as conn:
             return await conn.fetch(
                 "SELECT * FROM requests WHERE idservice = $1 ORDER BY createdate DESC", idservice
+            )
+
+    async def get_client_requests(self, client_tg_id: int) -> list:
+        """Заявки клиента по его Telegram ID"""
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(
+                """SELECT r.*, s.service_name FROM requests r
+                   LEFT JOIN services s ON r.idservice = s.idservice
+                   WHERE r.idclienttg = $1 ORDER BY r.createdate DESC""",
+                client_tg_id
             )
 
     async def get_services_by_city(self, city: str) -> list:

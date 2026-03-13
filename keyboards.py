@@ -11,9 +11,9 @@ CLIENT_NOTIFY = {
     "rejected": "❌ <b>Ваша заявка отклонена.</b>\n\nК сожалению, автосервис не может принять вашу заявку. Попробуйте обратиться позже или выбрать другой сервис.",
 }
 
-# ===== ОСНОВНЫЕ КНОПКИ =====
+# ===== ПОЛЬЗОВАТЕЛЬ =====
 def start_keyboard():
-    """Главное меню"""
+    """Главное меню обычного пользователя"""
     if URL_SITE:
         return ReplyKeyboardMarkup(
             keyboard=[[
@@ -30,8 +30,31 @@ def start_keyboard():
             resize_keyboard=True
         )
 
+# ===== АДМИНИСТРАТОР =====
+def admin_menu_keyboard():
+    """Меню администратора (назначенного управляющим)"""
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="📋 Мои заявки"), KeyboardButton(text="👥 Администраторы")],
+            [KeyboardButton(text="🚪 Покинуть сервис")],
+        ],
+        resize_keyboard=True
+    )
+
+# ===== УПРАВЛЯЮЩИЙ =====
+def owner_menu_keyboard():
+    """Меню управляющего (зарегистрировавшего сервис)"""
+    return ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(text="📋 Мои заявки"), KeyboardButton(text="👥 Администраторы")],
+            [KeyboardButton(text="➕ Добавить админа"), KeyboardButton(text="➖ Удалить админа")],
+            [KeyboardButton(text="ℹ️ О моем сервисе")],
+        ],
+        resize_keyboard=True
+    )
+
 def register_service_keyboard():
-    """Меню для неавторизованного админа"""
+    """Меню для неавторизованного пользователя"""
     return ReplyKeyboardMarkup(
         keyboard=[[
             KeyboardButton(text="📝 Зарегистрировать сервис")
@@ -39,7 +62,7 @@ def register_service_keyboard():
         resize_keyboard=True
     )
 
-# ===== АДМИН КНОПКИ =====
+# ===== ОБЩИЕ INLINE-КНОПКИ =====
 def admin_keyboard(request_id: str):
     """Кнопки для обновления статуса заявки"""
     return InlineKeyboardMarkup(inline_keyboard=[
@@ -52,12 +75,11 @@ def admin_keyboard(request_id: str):
         ]
     ])
 
-def admin_menu_keyboard():
-    """Главное меню админа"""
-    return ReplyKeyboardMarkup(
-        keyboard=[
-            [KeyboardButton(text="📋 Мои заявки")],
-            [KeyboardButton(text="ℹ️ О моем сервисе")]
-        ],
-        resize_keyboard=True
-    )
+def confirm_remove_admin_keyboard(service_id: str, admin_id: int):
+    """Подтверждение удаления администратора"""
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="✅ Удалить", callback_data=f"remove_confirm:{service_id}:{admin_id}"),
+            InlineKeyboardButton(text="❌ Отмена", callback_data="remove_cancel")
+        ]
+    ])
