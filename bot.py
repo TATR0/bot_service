@@ -5,7 +5,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import BotCommand, BotCommandScopeChat
 from config import BOT_TOKEN
 from database import db
-from handlers import register_service, service_link, client_request, main
+from handlers import register_service, service_link, client_request, main, request_details, stats
 import os
 
 logging.basicConfig(
@@ -29,6 +29,7 @@ ADMIN_COMMANDS = [
     BotCommand(command="start", description="🏠 Главное меню"),
     BotCommand(command="my_requests", description="📋 Заявки сервиса"),
     BotCommand(command="my_admins", description="👥 Список администраторов"),
+    BotCommand(command="stats", description="📊 Статистика сервиса"),
     BotCommand(command="leave_service", description="🚪 Покинуть сервис"),
 ]
 
@@ -36,6 +37,7 @@ OWNER_COMMANDS = [
     BotCommand(command="start", description="🏠 Главное меню"),
     BotCommand(command="my_requests", description="📋 Заявки сервиса"),
     BotCommand(command="my_admins", description="👥 Список администраторов"),
+    BotCommand(command="stats", description="📊 Статистика сервиса"),
     BotCommand(command="add_admin", description="➕ Добавить администратора"),
     BotCommand(command="remove_admin", description="➖ Удалить администратора"),
     BotCommand(command="register_service", description="📝 Зарегистрировать новый сервис"),
@@ -85,6 +87,7 @@ async def on_startup():
         logger.info("✅ BASE_WEBAPP_URL корректна")
 
     logger.info("✅ Бот запущен и БД подключена")
+    request_details.start_reminder_task(bot)
 
 
 async def on_shutdown():
@@ -97,6 +100,8 @@ def register_handlers():
         client_request.router,
         service_link.router,
         register_service.router,
+        request_details.router,
+        stats.router,
         main.router
     )
     logger.info("✅ Обработчики зарегистрированы")

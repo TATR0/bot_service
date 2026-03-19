@@ -38,7 +38,9 @@ URGENCY_NAMES = {
 }
 
 STATUS_LABELS = {
+    "new": "🆕 Новая",
     "accepted": "✅ Принято",
     "called": "📞 Связались",
-    "rejected": "❌ Отказ"
+    "rejected": "❌ Отказ",
+    "cancelled": "🚫 Отменена клиентом",
 }
