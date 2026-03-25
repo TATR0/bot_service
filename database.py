@@ -18,25 +18,6 @@ class Database:
             await self.pool.close()
             print("❌ БД отключена")
 
-    # ===== РОЛИ =====
-    async def is_owner(self, user_id: int) -> bool:
-        """Проверяет, является ли пользователь управляющим хотя бы одного сервиса"""
-        async with self.pool.acquire() as conn:
-            row = await conn.fetchrow(
-                "SELECT 1 FROM services WHERE owner_id = $1 LIMIT 1", user_id
-            )
-            return row is not None
-
-    async def is_admin(self, user_id: int) -> bool:
-        """Проверяет, является ли пользователь активным администратором (но не управляющим)"""
-        async with self.pool.acquire() as conn:
-            row = await conn.fetchrow(
-                """SELECT 1 FROM admins
-                   WHERE idusertg = $1 AND idrecstatus = 0 LIMIT 1""",
-                user_id
-            )
-            return row is not None
-
     # ===== СЕРВИСЫ =====
     async def add_service(self, service_name: str, phone: str, owner_id: int,
                           location: str = "", city: str = "") -> str:
@@ -155,7 +136,7 @@ class Database:
             )
 
     async def get_all_admins_by_service(self, service_id: str) -> list:
-        """Все активные администраторы для отображения списка"""
+        """Все администраторы включая удалённых (для отображения списка)"""
         async with self.pool.acquire() as conn:
             return await conn.fetch(
                 """SELECT a.idadmins, a.idservice, a.idusertg, a.idrecstatus
@@ -196,64 +177,6 @@ class Database:
             return await conn.fetch(
                 "SELECT * FROM requests WHERE idservice = $1 ORDER BY createdate DESC", idservice
             )
-
-    async def get_client_requests(self, client_tg_id: int) -> list:
-        """Заявки клиента по его Telegram ID"""
-        async with self.pool.acquire() as conn:
-            return await conn.fetch(
-                """SELECT r.*, s.service_name FROM requests r
-                   LEFT JOIN services s ON r.idservice = s.idservice
-                   WHERE r.idclienttg = $1 ORDER BY r.createdate DESC""",
-                client_tg_id
-            )
-
-    async def get_service_stats(self, idservice: str) -> dict:
-        """
-        Статистика сервиса: всего, по статусам, за сегодня/неделю/месяц,
-        топ-3 услуги, конверсия.
-        """
-        async with self.pool.acquire() as conn:
-            rows = await conn.fetch(
-                "SELECT status, COUNT(*) AS cnt FROM requests WHERE idservice = $1 GROUP BY status",
-                idservice
-            )
-            by_status = {r['status']: r['cnt'] for r in rows}
-            total = sum(by_status.values())
-
-            today = await conn.fetchval(
-                "SELECT COUNT(*) FROM requests WHERE idservice = $1 AND createdate >= CURRENT_DATE",
-                idservice
-            )
-            week = await conn.fetchval(
-                """SELECT COUNT(*) FROM requests WHERE idservice = $1
-                   AND createdate >= date_trunc('week', CURRENT_DATE)""",
-                idservice
-            )
-            month = await conn.fetchval(
-                """SELECT COUNT(*) FROM requests WHERE idservice = $1
-                   AND createdate >= date_trunc('month', CURRENT_DATE)""",
-                idservice
-            )
-            top_services = await conn.fetch(
-                """SELECT service_type, COUNT(*) AS cnt FROM requests
-                   WHERE idservice = $1 AND service_type IS NOT NULL AND service_type != ''
-                   GROUP BY service_type ORDER BY cnt DESC LIMIT 3""",
-                idservice
-            )
-
-            accepted = by_status.get('accepted', 0) + by_status.get('called', 0)
-            relevant = total - by_status.get('cancelled', 0)
-            conversion = round(accepted / relevant * 100) if relevant > 0 else 0
-
-        return {
-            "total": total,
-            "by_status": by_status,
-            "today": today,
-            "week": week,
-            "month": month,
-            "top_services": [(r['service_type'], r['cnt']) for r in top_services],
-            "conversion": conversion,
-        }
 
     async def get_services_by_city(self, city: str) -> list:
         async with self.pool.acquire() as conn:
